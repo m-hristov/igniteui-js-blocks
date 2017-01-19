@@ -1,0 +1,38 @@
+<h3>Data utils:</h3>
+    
+    <h4>Paging:</h4>
+    <div class="igx-form-group">
+        <input width="100" igxInput type="number" [(ngModel)]="paging.pageIndex"/> <label igxLabel>Page index: </label> 
+    </div>
+    <div class="igx-form-group">
+        <input igxInput type="number" [(ngModel)]="paging.pageSize"/><label igxLabel>Page size:</label>
+        <button igxButton="raised" igxButtonColor="white" igxButtonBackground="#4CAF50" igxRipple="white" (click)="renderPageData()">Generate paging data</button>
+        <button igxButton="raised" igxButtonColor="white" igxButtonBackground="#4CAF50" igxRipple="white" (click)="test()">Test</button>
+    </div>
+    <span [innerHTML]="paging.pageInfo"></span>
+
+    <data-iterator #listPagingData></data-iterator>
+    
+    <hr />
+
+    <h4>Filtering</h4>
+    <div class="igx-form-group">
+        <input width="100" igxInput type="text" [(ngModel)]="filtering.searchVal"/> <label igxLabel>Filter: </label> 
+    </div>
+    <button igxButton="raised" igxButtonColor="white"igxButtonBackground="#4CAF50" igxRipple="white" (click)="renderFilterData()">Filter</button>
+    <span [innerHTML]="filtering.info"></span>
+
+    <data-iterator #listFilteringData></data-iterator>
+
+    <hr />
+
+    <h4>Sorting</h4>
+    <div class="igx-form-group">
+        <input width="100" igxInput type="text" [(ngModel)]="sorting.key"/> <label igxLabel>Column Key: </label> 
+    </div>
+    <button igxButton="raised" igxButtonColor="white"igxButtonBackground="#4CAF50" igxRipple="white" (click)="this.data.rows[10].col1 = 100;renderSortedData()">Sort</button>
+    <span [innerHTML]="sorting.info"></span>
+
+    <data-iterator #listSortingData></data-iterator>
+    
+<hr>

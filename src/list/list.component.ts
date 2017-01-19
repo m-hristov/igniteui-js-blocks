@@ -1,4 +1,4 @@
-import { Component, Input, ContentChildren, QueryList, Renderer, NgModule, OnInit, OnDestroy, ViewChild, Inject, forwardRef, ElementRef } from '@angular/core';
+import { Component, Input, ContentChildren, QueryList, Renderer, NgModule, Output, EventEmitter, OnInit, OnDestroy, ViewChild, Inject, forwardRef, ElementRef } from '@angular/core';
 import { CommonModule } from "@angular/common";
 import { HammerGesturesManager } from '../core/touch';
 
@@ -191,10 +191,34 @@ export class IgxListItem implements OnInit, OnDestroy, IListChild {
     }
 }
 
+
+
+
+@Component({
+  selector: 'rio-counter',
+  template: `<div>
+  <p>
+    <ng-content></ng-content>
+    Count: {{ count }} -
+    <button (click)="increment()">Increment</button>
+  </p>
+</div>`
+})
+export class CounterComponent {
+  @Input() count = 0;
+//   @Output() countChange = new EventEmitter<number>();
+
+//   increment() {
+//     this.count++;
+//     this.countChange.emit(this.count);
+//   }
+}
+
 @NgModule({
-    declarations: [IgxList, IgxListItem, IgxListHeader],
+    declarations: [IgxList, IgxListItem, IgxListHeader, CounterComponent],
     imports: [CommonModule],
-    exports: [IgxList, IgxListItem, IgxListHeader]
+    exports: [IgxList, IgxListItem, IgxListHeader, CounterComponent]
 })
 export class IgxListModule {
 }
+
