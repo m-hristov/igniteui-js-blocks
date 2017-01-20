@@ -72,7 +72,7 @@ export class DataUtilSampleComponent implements OnInit {
     constructor() {
     }
     ngOnInit() {
-        this.data = this.generateData(10, 5);// generates 10 rows with 5 columns in each row
+        this.data = this.generateData(50000, 5);// generates 10 rows with 5 columns in each row
         this.dataSource = new DataSource(this.data.rows, this.data.rows.length);
         this.renderPageData();
         // this.renderFilterData();
@@ -90,7 +90,7 @@ export class DataUtilSampleComponent implements OnInit {
                                         "searchVal": this.filtering.searchVal},
             // sorting settings
             se0 = <SortingExpression> {
-                                        fieldName: this.sorting.key || "col1",
+                                        fieldName: "number",
                                         dir: "desc"
                                     },
             se1 = <SortingExpression> {
@@ -101,7 +101,8 @@ export class DataUtilSampleComponent implements OnInit {
             t = new Date().getTime(),
             keys = this.data.keys;// generates 10 rows with 3 columns in each row;
         this.dataSource
-            .filter([fe], true, this.dataSource.data)
+            .dataBind()
+            .filter([fe], true)
             .sort([se0, se1], true)
             .page(pageIndex, pageSize);
         res = this.dataSource.pagingData;
@@ -146,7 +147,7 @@ export class DataUtilSampleComponent implements OnInit {
         if (countCols <= 0) {
             return predCols;
         }
-        if (countCols - predCols.length >= 0) {
+        if (countCols - predCols.length <= 0) {
             return predCols.slice(0, countCols);
         }
         countCols = countCols - predCols.length;
@@ -159,13 +160,7 @@ export class DataUtilSampleComponent implements OnInit {
     generateData(countRows?: number, countCols?: number) {
         countCols = countCols || 1;
         countRows = countRows || 0;
-        var i, j, data = [], row, cols = ["date"], key;
-        // generate columns
-        for (j = 0; j < countCols; j++) {
-            cols.push(`col${j}`);
-        }
-        cols.push("date");
-        cols.push("bool");
+        var i, j, data = [], row, cols = this.generateColumns(countCols), key;
         for (i = 0; i < countRows; i++) {
             row = {};
             for (j = 0; j < countCols; j++) {

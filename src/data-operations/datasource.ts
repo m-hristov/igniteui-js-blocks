@@ -13,12 +13,16 @@ export class DataSource {
      */
     data: any[];
     /**
+     *
      * The total number of records that is available.
      */
     total: number;
     dataView: any[];
     pagingData: PagingData;
-    filteringData;
+    filteringData: {
+        countFilteredRecords: number; 
+        filteredData: any[]
+    };
     constructor (data: any[] = [], total?: number) {
         this.data = data;
         this.dataView = data;
@@ -27,6 +31,10 @@ export class DataSource {
         } else {
             this.total = (this.data && this.data.length) || 0;
         }
+    }
+    dataBind(): DataSource {
+        this.dataView = this.data;
+        return this;
     }
     getRecordByIndex (index: number, data?: any[]) {
         if (index < 0) {
@@ -45,14 +53,20 @@ export class DataSource {
         }
         return null;
     }
-    sort (expressions: SortingExpression[], ignoreCase: boolean = true, data?: any[]): DataSource{
+    sort (expressions: SortingExpression[], ignoreCase: boolean = true, data?: any[]): DataSource {
         data = data || this.dataView;
         this.dataView = DataUtil.sort(data, expressions, ignoreCase);
         return this;
     }
     filter (expressions: FilteringExpression[], filterSettings?: FilterSettings, data?: any[]): DataSource {
         data = data || this.data;
-        this.dataView = DataUtil.filter(data, expressions, filterSettings);
+        var res;
+        res = DataUtil.filter(data, expressions, filterSettings);
+        this.filteringData = {
+            countFilteredRecords: res.length,
+            filteredData: res
+        };
+        this.dataView = res
         return this;
     }
     page(pageIndex: number, pageSize: number, data?: any[]): DataSource {
