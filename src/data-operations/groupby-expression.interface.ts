@@ -1,4 +1,4 @@
-import {SortingExpression} from "./sorting-expressions.interface";
+import {SortingExpression} from "./sorting-expression.interface";
 /**
  * Represents sorting expressions.
  */

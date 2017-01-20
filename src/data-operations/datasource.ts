@@ -1,9 +1,9 @@
-import {DataUtil} from "./data-util";
+import {FilterSettings, DataUtil} from "./data-util";
 import {SortingExpression} from "./sorting-expression.interface";
 import {FilteringExpression} from "./filtering-expression.interface";
 import {GroupByExpression} from "./groupby-expression.interface";
 import {FilterOperators} from "./filter-operators";
-
+import {PagingData} from "./paging-data.interface";
 /**
  * Represents the result of the [`process`]({% slug api_kendo-data-query_process_kendouiforangular%}) method applied to a data structure.
  */
@@ -17,7 +17,7 @@ export class DataSource {
      */
     total: number;
     dataView: any[];
-    pagingData;
+    pagingData: PagingData;
     filteringData;
     constructor (data: any[] = [], total?: number) {
         this.data = data;
@@ -45,12 +45,12 @@ export class DataSource {
         }
         return null;
     }
-    sort (expressions: SortingExpression[], sortingSettings?: {ignoreCase: true}, data?: any[]): DataSource{
+    sort (expressions: SortingExpression[], ignoreCase: boolean = true, data?: any[]): DataSource{
         data = data || this.dataView;
-        this.dataView = DataUtil.sort(data, expressions, sortingSettings);
+        this.dataView = DataUtil.sort(data, expressions, ignoreCase);
         return this;
     }
-    filter (expressions: FilteringExpression[], filterSettings?: {boolLogic?: "and"|"or", ignoreCase?: boolean}, data?: any[]): DataSource {
+    filter (expressions: FilteringExpression[], filterSettings?: FilterSettings, data?: any[]): DataSource {
         data = data || this.data;
         this.dataView = DataUtil.filter(data, expressions, filterSettings);
         return this;
@@ -58,7 +58,7 @@ export class DataSource {
     page(pageIndex: number, pageSize: number, data?: any[]): DataSource {
         data = data || this.dataView;
         this.pagingData = DataUtil.page(data, pageIndex, pageSize);
-        this.dataView = this.pagingData.data;
+        this.dataView = this.pagingData.pageData;
         return this;
     }
 }

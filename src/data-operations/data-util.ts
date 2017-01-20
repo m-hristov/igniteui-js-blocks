@@ -2,8 +2,12 @@ import {SortingExpression} from "./sorting-expression.interface";
 import {FilteringExpression} from "./filtering-expression.interface";
 import {GroupByExpression} from "./groupby-expression.interface";
 import {FilterOperators} from "./filter-operators";
+import { PagingData } from "./paging-data.interface";
 
-
+export interface FilterSettings {
+    boolLogic?: "and"|"or";
+    ignoreCase?: boolean;
+}
 
 export class DataUtil {
     static groupedRecordsByExpression<T> (data: T[], index: number, expression: SortingExpression, ignoreCase?: boolean): T[] {
@@ -93,19 +97,18 @@ export class DataUtil {
         return data;
     }
     static sort<T> (data: T[], expressions: SortingExpression[], 
-                    sortingSettings?: {ignoreCase: true}): T[] {
+                    ignoreCase: boolean = true): T[] {
         if (!expressions || data.length <= 1) {
             return data;
         }
-        var ignoreCase = sortingSettings && sortingSettings.ignoreCase;
         return DataUtil.sortDataRecursive(data, expressions, null, ignoreCase);
     }
-    static page<T> (data: T[], pageIndex: number, pageSize: number) {//{ data: T[], pageCount: number}
+    static page<T> (data: T[], pageIndex: number, pageSize: number): PagingData {//{ data: T[], pageCount: number}
         var len = data.length, 
-            res = {
+            res: PagingData = {
                 err: null,
-                allData: data,
-                data: [],
+                data: data,
+                pageData: [],
                 pageCount: 0,
                 total: len,
                 pageSize: pageSize,
@@ -124,7 +127,7 @@ export class DataUtil {
             res.err = `pageIndex is greater or equal to pageCount: ${res.pageCount}`;
             return res;
         }
-        res.data = data.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)
+        res.pageData = data.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)
         return res;
     }
     static filter<T> (data: T[], expressions: FilteringExpression[], filterSettings?: {boolLogic?: "and"|"or", ignoreCase?: boolean}): T[] {

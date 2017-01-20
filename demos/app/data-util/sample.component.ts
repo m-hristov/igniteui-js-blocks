@@ -1,10 +1,10 @@
 import { Component, Input, ViewChild, OnInit } from "@angular/core";
 import { DataSource } from "../../../src/data-operations/datasource";
-import { GridData } from "../../../src/data-operations/grid-data.interface";
 import { DataUtil } from "../../../src/data-operations/data-util";
 import { FilterOperators } from "../../../src/data-operations/filter-operators";
 import {FilteringExpression} from "../../../src/data-operations/filtering-expression.interface";
 import { SortingExpression} from "../../../src/data-operations/sorting-expression.interface";
+import { PagingData } from "../../../src/data-operations/paging-data.interface";
 @Component({
     selector: "data-iterator",
     moduleId: module.id,
@@ -72,7 +72,7 @@ export class DataUtilSampleComponent implements OnInit {
     constructor() {
     }
     ngOnInit() {
-        this.data = this.generateData(35000, 5);// generates 10 rows with 5 columns in each row
+        this.data = this.generateData(10, 5);// generates 10 rows with 5 columns in each row
         this.dataSource = new DataSource(this.data.rows, this.data.rows.length);
         this.renderPageData();
         // this.renderFilterData();
@@ -84,7 +84,7 @@ export class DataUtilSampleComponent implements OnInit {
             pageSize = p.pageSize,
             // filtering expression
             fe = <FilteringExpression> {
-                                        caseSensitive: false, 
+                                        //caseSensitive: false, 
                                         operator: FilterOperators.string.contains,
                                         fieldName: "col2",
                                         "searchVal": this.filtering.searchVal},
@@ -97,15 +97,13 @@ export class DataUtilSampleComponent implements OnInit {
                                         fieldName: "col2",
                                         dir: "desc"
                                     },
-            res, t0,
+            res,
             t = new Date().getTime(),
             keys = this.data.keys;// generates 10 rows with 3 columns in each row;
-            
         this.dataSource
-            .filter([fe], {ignoreCase: true}, this.dataSource.data)
-            .sort([se0, se1], {ignoreCase: true})
+            .filter([fe], true, this.dataSource.data)
+            .sort([se0, se1], true)
             .page(pageIndex, pageSize);
-        
         res = this.dataSource.pagingData;
         p.pageInfo = res.err || `Page: ${pageIndex + 1} of ${res.pageCount} page(s) | 
                                 Total rows count: ${res.total} | 

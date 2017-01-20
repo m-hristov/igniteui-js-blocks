@@ -8,5 +8,8 @@ export interface FilteringExpression {
    caseSensitive?: boolean;
    type?: "string"|"number"|"boolean"|"date";
    dateFormat?: "string";
-   resolvedOperator: Function;
+   /**
+    * @hidden
+    */
+   resolvedOperator?: Function;
 }
