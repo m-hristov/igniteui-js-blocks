@@ -1,9 +1,9 @@
-import {FilteringSettings} from "./filtering-settings.interface";
-import {SortingExpression} from "./sorting-expression.interface";
-import {FilteringExpression} from "./filtering-expression.interface";
-import {GroupByExpression} from "./groupby-expression.interface";
-import {FilteringOperators} from "./filtering-operators";
-import {PagingData} from "./paging-data.interface";
+import { FilteringExpression } from "./filtering-expression.interface";
+import { FilteringOperators } from "./filtering-operators";
+import { FilteringSettings } from "./filtering-settings.interface";
+import { SortingExpression } from "./sorting-expression.interface";
+import { PagingData } from "./paging-data.interface";
+import { ColumnDefinition } from "./column-definition.interface";
 import {DataUtil} from "./data-util";
 
 /**
@@ -180,29 +180,34 @@ export class DataSource {
         return this;
     }
     // CRUD operations
-    addRecord (record: Object, at?: number): DataSource {
+    addRecord (record: Object, at?: number, data?: any[]): DataSource {
+        data = data || this.data;
         if (at === null || at === undefined) {
-            this.data.push(record);
-        }
-        this.data.splice(at, 0, record);
-        return this;
-    }
-    deleteRecord(record: Object): DataSource {
-        var index:number = this.data.indexOf(record);
-        return this.deleteRecordByIndex(index);
-    }
-    deleteRecordByIndex(index: number): DataSource {
-        if (index < 0 || index >= this.data.length || !this.data[index]) {
+            data.push(record);
             return this;
         }
-        this.data.splice(index, 1);
+        data.splice(at, 0, record);
         return this;
     }
-    updateRecordByIndex(index: number, record: Object): DataSource {
-        if (!this.data[index]) {
-            return;
+    deleteRecord(record: Object, data?: any[]): DataSource {
+        data = data || this.data;
+        var index:number = data.indexOf(record);
+        return this.deleteRecordByIndex(index, data);
+    }
+    deleteRecordByIndex(index: number, data?: any[]): DataSource {
+        data = data || this.data;
+        if (!data || index < 0 || index >= data.length || !data[index]) {
+            return this;
         }
-        this.data[index] = record;
+        data.splice(index, 1);
+        return this;
+    }
+    updateRecordByIndex(index: number, record: Object, data?: any[]): DataSource {
+        data = data || this.data;
+        if (!data[index]) {
+            return this;
+        }
+        data[index] = record;
         return this;
     }
 }
