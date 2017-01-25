@@ -1,6 +1,6 @@
 import {FilteringExpression} from "./filtering-expression.interface";
 
-export class FilterOperators {
+export class FilteringOperators {
     static applyIgnoreCase (a: string, ignore) : string {
         if (a === null || a === undefined) {
             return "";
@@ -55,38 +55,38 @@ export class FilterOperators {
     static string = {
         contains: function (val: string, expr: FilteringExpression, ignore?: boolean) : boolean
         {
-            var val = FilterOperators.applyIgnoreCase(val, ignore), 
-                search = FilterOperators.applyIgnoreCase(expr.searchVal, ignore);
+            var val = FilteringOperators.applyIgnoreCase(val, ignore), 
+                search = FilteringOperators.applyIgnoreCase(expr.searchVal, ignore);
             return val.indexOf(search) !== -1;
         },
         startsWith: function (val: string, expr: FilteringExpression, ignore?: boolean) : boolean
         {
-            var val = FilterOperators.applyIgnoreCase(val, ignore), 
-                search = FilterOperators.applyIgnoreCase(expr.searchVal, ignore);
+            var val = FilteringOperators.applyIgnoreCase(val, ignore), 
+                search = FilteringOperators.applyIgnoreCase(expr.searchVal, ignore);
             return val.startsWith(search);
         },
         endsWith: function (val: string, expr: FilteringExpression, ignore?: boolean) : boolean
         {
-            var val = FilterOperators.applyIgnoreCase(val, ignore), 
-                search = FilterOperators.applyIgnoreCase(expr.searchVal, ignore);
+            var val = FilteringOperators.applyIgnoreCase(val, ignore), 
+                search = FilteringOperators.applyIgnoreCase(expr.searchVal, ignore);
             return val.endsWith(search);
         },
         doesNotContain: function (val: string, expr: FilteringExpression, ignore?: boolean) : boolean
         {
-            var val = FilterOperators.applyIgnoreCase(val, ignore), 
-                search = FilterOperators.applyIgnoreCase(expr.searchVal, ignore);
+            var val = FilteringOperators.applyIgnoreCase(val, ignore), 
+                search = FilteringOperators.applyIgnoreCase(expr.searchVal, ignore);
             return val.indexOf(search) === -1;
         },
         equals: function (val: string, expr: FilteringExpression, ignore?: boolean) : boolean
         {
-            var val = FilterOperators.applyIgnoreCase(val, ignore), 
-                search = FilterOperators.applyIgnoreCase(expr.searchVal, ignore);
+            var val = FilteringOperators.applyIgnoreCase(val, ignore), 
+                search = FilteringOperators.applyIgnoreCase(expr.searchVal, ignore);
             return val === search;
         },
         doesNotEqual: function (val: string, expr: FilteringExpression, ignore?: boolean) : boolean
         {
-            var val = FilterOperators.applyIgnoreCase(val, ignore), 
-                search = FilterOperators.applyIgnoreCase(expr.searchVal, ignore);
+            var val = FilteringOperators.applyIgnoreCase(val, ignore), 
+                search = FilteringOperators.applyIgnoreCase(expr.searchVal, ignore);
             return val !== search;
         },
         null: function (val: string, expr: FilteringExpression, ignore?: boolean) : boolean
@@ -182,29 +182,29 @@ export class FilterOperators {
             return val > expr.searchVal;
         },
         today: function (val: Date, expr: FilteringExpression) : boolean {
-            var d = FilterOperators.getDateParts(val, "yMd"), 
-                now = FilterOperators.getDateParts(new Date(), "yMd");
+            var d = FilteringOperators.getDateParts(val, "yMd"), 
+                now = FilteringOperators.getDateParts(new Date(), "yMd");
             return  d.year === now.year &&
                     d.month === now.month &&
                     d.day === now.day;
         },
         yesterday: function (val: Date, expr: FilteringExpression) : boolean {
-            var d = FilterOperators.getDateParts(val, "yMd"), 
+            var d = FilteringOperators.getDateParts(val, "yMd"), 
                 y = ( d => new Date(d.setDate(d.getDate() - 1)) )(new Date),
-                yesterday = FilterOperators.getDateParts(y, "yMd");
+                yesterday = FilteringOperators.getDateParts(y, "yMd");
             return  d.year === yesterday.year &&
                     d.month === yesterday.month &&
                     d.day === yesterday.day;
         },
         thisMonth: function (val: Date, expr: FilteringExpression) : boolean {
-            var d = FilterOperators.getDateParts(val, "yM"), 
-                now = FilterOperators.getDateParts(new Date(), "yM");
+            var d = FilteringOperators.getDateParts(val, "yM"), 
+                now = FilteringOperators.getDateParts(new Date(), "yM");
             return  d.year === now.year &&
                     d.month === now.month;
         },
         lastMonth: function (val: Date, expr: FilteringExpression) : boolean {
-            var d = FilterOperators.getDateParts(val, "yM"), 
-                now = FilterOperators.getDateParts(new Date(), "yM");
+            var d = FilteringOperators.getDateParts(val, "yM"), 
+                now = FilteringOperators.getDateParts(new Date(), "yM");
             if (!now.month) {
                 now.month -= 1;
                 now.year -= 1;
@@ -213,8 +213,8 @@ export class FilterOperators {
                     d.month === now.month;
         },
         nextMonth: function (val: Date, expr: FilteringExpression) : boolean {
-            var d = FilterOperators.getDateParts(val, "yM"), 
-                now = FilterOperators.getDateParts(new Date(), "yM");
+            var d = FilteringOperators.getDateParts(val, "yM"), 
+                now = FilteringOperators.getDateParts(new Date(), "yM");
             if (now.month === 11) {
                 now.month = 0;
                 now.year += 1;
@@ -223,24 +223,24 @@ export class FilterOperators {
                     d.month === now.month;
         },
         thisYear: function (val: Date, expr: FilteringExpression) : boolean {
-            var d = FilterOperators.getDateParts(val, "y"), 
-                now = FilterOperators.getDateParts(new Date(), "y");
+            var d = FilteringOperators.getDateParts(val, "y"), 
+                now = FilteringOperators.getDateParts(new Date(), "y");
             return  d.year === now.year;
         },
         lastYear: function (val: Date, expr: FilteringExpression) : boolean {
-            var d = FilterOperators.getDateParts(val, "y"), 
-                now = FilterOperators.getDateParts(new Date(), "y");
+            var d = FilteringOperators.getDateParts(val, "y"), 
+                now = FilteringOperators.getDateParts(new Date(), "y");
             return  d.year === now.year - 1;
         },
         nextYear: function (val: Date, expr: FilteringExpression) : boolean {
-            var d = FilterOperators.getDateParts(val, "y"), 
-                now = FilterOperators.getDateParts(new Date(), "y");
+            var d = FilteringOperators.getDateParts(val, "y"), 
+                now = FilteringOperators.getDateParts(new Date(), "y");
             return  d.year === now.year + 1;
         },
         on: function (val: Date, expr: FilteringExpression) : boolean {
             var match = true,
-                d = FilterOperators.getDateParts(val, expr.dateFormat), 
-                search = FilterOperators.getDateParts(expr.searchVal, expr.dateFormat);
+                d = FilteringOperators.getDateParts(val, expr.dateFormat), 
+                search = FilteringOperators.getDateParts(expr.searchVal, expr.dateFormat);
             if (!expr.dateFormat) {
                 return val === expr.searchVal;
             }
@@ -268,7 +268,7 @@ export class FilterOperators {
             return match;
         },
         notOn: function (val: Date, expr: FilteringExpression) : boolean {
-            return !FilterOperators.date.on(val, expr);
+            return !FilteringOperators.date.on(val, expr);
         },
         null: function (val: Date, expr: FilteringExpression) : boolean {
             return val === null;

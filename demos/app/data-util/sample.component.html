@@ -1,8 +1,13 @@
 <h3>Data utils:</h3>
-    
+    <h4>DataSource</h4>
+    <data-iterator #list></data-iterator>
+
+
     <h4>Paging:</h4>
     <div class="igx-form-group">
         <input width="100" igxInput type="number" [(ngModel)]="paging.pageIndex"/> <label igxLabel>Page index: </label> 
+        <button igxButton="raised" (click)="rebind()">Rebind</button>
+        <button igxButton="raised" (click)="reset()">Reset DataSource settings</button>
     </div>
     <div class="igx-form-group">
         <input igxInput type="number" [(ngModel)]="paging.pageSize"/><label igxLabel>Page size:</label>

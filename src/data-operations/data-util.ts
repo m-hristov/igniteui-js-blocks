@@ -1,15 +1,105 @@
-import {SortingExpression} from "./sorting-expression.interface";
-import {FilteringExpression} from "./filtering-expression.interface";
-import {GroupByExpression} from "./groupby-expression.interface";
-import {FilterOperators} from "./filter-operators";
+import { FilteringExpression } from "./filtering-expression.interface";
+import { FilteringOperators } from "./filtering-operators";
+import { FilteringSettings } from "./filtering-settings.interface";
+import { SortingExpression } from "./sorting-expression.interface";
 import { PagingData } from "./paging-data.interface";
-
-export interface FilterSettings {
-    boolLogic?: "and"|"or";
-    ignoreCase?: boolean;
-}
+import { ColumnDefinition } from "./column-definition.interface";
 
 export class DataUtil {
+    static sort<T> (data: T[], expressions: SortingExpression[], 
+                    ignoreCase: boolean = true): T[] {
+        if (!expressions || data.length <= 1) {
+            return data;
+        }
+        return DataUtil.sortDataRecursive(data, expressions, null, ignoreCase);
+    }
+    static page<T> (data: T[], pageIndex: number, pageSize: number): PagingData {//{ data: T[], pageCount: number}
+        var len = data.length, 
+            res: PagingData = {
+                err: null,
+                data: data,
+                pageData: [],
+                pageCount: 0,
+                total: len,
+                pageSize: pageSize,
+                pageIndex: pageIndex
+            };
+        if (pageIndex < 0 || isNaN(pageIndex)) {
+            res.err = "pageIndex should be number and should be greater than or equal to 0";
+            return res;
+        }
+        if (pageSize <= 0 || isNaN(pageSize)) {
+            res.err = "pageSize should be number and should be greater than 0";
+            return res;
+        }
+        res.pageCount = Math.ceil(len / pageSize);
+        if (pageIndex >= res.pageCount) {
+            res.err = `pageIndex is greater or equal to pageCount: ${res.pageCount}`;
+            return res;
+        }
+        res.pageData = data.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)
+        return res;
+    }
+    static filter<T> (data: T[], expressions: FilteringExpression[], settings?: FilteringSettings): T[] {
+        var i, len = data.length, 
+            res: T[] = [], 
+            rec;
+        for (i = 0; i < len; i++) {
+            rec = data[i];
+            if (DataUtil.findMatchByExpressions(rec, expressions, settings)) {
+                res.push(rec);
+            }
+        }
+        return res;
+    }
+    static process<T> (data: T[], settings: {
+                                    filtering?: {
+                                        expressions?: FilteringExpression[], settings?: FilteringSettings
+                                    },
+                                    sorting?: {
+                                        expressions?: SortingExpression[], ignoreCase?: boolean
+                                    }
+                                    paging?: {pageIndex: number, pageSize: number}
+                                }
+            ): T[] {
+        var f, s, p;
+        if (!settings) {
+            return data;
+        }
+        f = settings.filtering;
+        if (f && f.expressions && f.expressions.length) {
+            data = DataUtil.filter(data, f.expressions, f.settings);
+        }
+        s = settings.sorting;
+        if (s && s.expressions && s.expressions.length) {
+            data = DataUtil.sort(data, s.expressions, s.ignoreCase);
+        }
+        p = settings.paging;
+        if (p) {
+            data = DataUtil.page(data, p.pageIndex, p.pageSize).pageData;
+        }
+        return data;
+    }
+    private static transform<T>(
+                data: T[],
+                schema: Array<ColumnDefinition>,
+                clone: boolean = false): Array<any> {
+        if (!data || !schema || !schema.length) {
+            return data;
+        }
+        var i, len = data.length, res = [], trec;
+        for (i = 0; i < len; i++) {
+            trec = DataUtil.transformRecord(data[i], schema, clone);
+            if (clone) {
+                res.push(trec);
+            } else {
+                data[i] = trec;
+            }
+        }
+        return clone ? res : data;
+    }
+    /* HELPER FUNCTIONS */
+    /* SORTING/GROUP-BY */
     static groupedRecordsByExpression<T> (data: T[], index: number, expression: SortingExpression, ignoreCase?: boolean): T[] {
         var i, res = [], cmpRes, groupval,
             cmpFunc = expression.compareFunc,
@@ -96,57 +186,66 @@ export class DataUtil {
         }
         return data;
     }
-    static sort<T> (data: T[], expressions: SortingExpression[], 
-                    ignoreCase: boolean = true): T[] {
-        if (!expressions || data.length <= 1) {
-            return data;
-        }
-        return DataUtil.sortDataRecursive(data, expressions, null, ignoreCase);
-    }
-    static page<T> (data: T[], pageIndex: number, pageSize: number): PagingData {//{ data: T[], pageCount: number}
-        var len = data.length, 
-            res: PagingData = {
-                err: null,
-                data: data,
-                pageData: [],
-                pageCount: 0,
-                total: len,
-                pageSize: pageSize,
-                pageIndex: pageIndex
-            };
-        if (pageIndex < 0 || isNaN(pageIndex)) {
-            res.err = "pageIndex should be number and should be greater than or equal to 0";
-            return res;
-        }
-        if (pageSize <= 0 || isNaN(pageSize)) {
-            res.err = "pageSize should be number and should be greater than 0";
-            return res;
-        }
-        res.pageCount = Math.ceil(len / pageSize);
-        if (pageIndex >= res.pageCount) {
-            res.err = `pageIndex is greater or equal to pageCount: ${res.pageCount}`;
-            return res;
-        }
-        res.pageData = data.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)
-        return res;
-    }
-    static filter<T> (data: T[], expressions: FilteringExpression[], filterSettings?: {boolLogic?: "and"|"or", ignoreCase?: boolean}): T[] {
-        var i, len = data.length, 
-            res: T[] = [], 
-            rec;
+    /* //SORTING/GROUP-BY */
+
+    /* SCHEMA TRANSFORM */
+    static transformRecord<T>(record: T,
+                                    schema: Array<ColumnDefinition>,
+                                    clone: boolean = false) {
+        var i, len = schema.length, trec = clone? {} : record, fn;
         for (i = 0; i < len; i++) {
-            rec = data[i];
-            if (DataUtil.findMatchByExpressions(rec, expressions, filterSettings)) {
-                res.push(rec);
+            fn = schema[i].fieldName;
+            trec[fn] = DataUtil.convertType(record[fn], schema[i].type, record);
+        }
+        return trec;
+    }
+    static convertType<T>(val, type: "string"|"number"|"date"|"boolean"|"any", record: T) {
+        if (!type || type === "any") {
+            return val;
+        }
+        if (type === "string") {
+            return val === null || val === undefined ? "" : val + "";
+        }
+        if (type === "number") {
+            return val === null || val === undefined ? null : +val;
+        }
+        if (type === "boolean") {
+            return !!val;
+        }
+        if (type === "date") {
+            if (typeof val === "" || val === null || val === undefined) {
+                return null;
             }
+            if (Object.prototype.toString.call(val) === '[object Date]') {
+                if (isNaN(val.getTime())) {
+                    return null;
+                }
+                return val;
+            }
+            return new Date(val);
         }
-        return res;
+        return val;
     }
-    private static findMatchByExpressions(rec: Object, expressions: FilteringExpression[], filterSettings): Boolean {
-        filterSettings = filterSettings || {};
-        var i, len = expressions.length, match = false, boolLogic = filterSettings.boolLogic || "and";
+    static getType (o): string {
+		var t = typeof o;
+		if (t === "undefined" || t === "string") {
+			return "string";
+		} else if (o && o.getTime && !isNaN(o.getTime()) &&
+			Object.prototype.toString.call(o) === "[object Date]") {
+			return "date";
+		} else if (t === "boolean" || t === "number" || t === "object") {
+			return t;
+		}
+        return "string";
+	}
+    /* //SCHEMA TRANSFORM */
+
+    /* FILTERING */
+    private static findMatchByExpressions(rec: Object, expressions: FilteringExpression[], settings?: FilteringSettings): Boolean {
+        settings = settings || {};
+        var i, len = expressions.length, match = false, boolLogic = settings.boolLogic || "and";
         for (i = 0; i < len; i++) {
-            match = DataUtil.findMatch(rec, expressions[i], filterSettings.ignoreCase);
+            match = DataUtil.findMatch(rec, expressions[i], settings.ignoreCase);
             if (boolLogic === "and") {
                 if (!match) {
                     return false;
@@ -160,7 +259,7 @@ export class DataUtil {
         return match;
     }
     private static findOperatorByName(operator: string, expr?: FilteringExpression): Function {
-        var t, fo = FilterOperators, res;
+        var t, fo = FilteringOperators, res;
         if (expr && expr.type && fo[expr.type]) {
             return fo[expr.type][operator];
         }
@@ -173,21 +272,19 @@ export class DataUtil {
         }
         return null;
     }
-    private static findMatch(rec: Object, expr: FilteringExpression, ignoreCase?: boolean): boolean {
-        var op = expr.operator,
+    static findMatch(rec: Object, expr: FilteringExpression, ignoreCase?: boolean): boolean {
+        var op = expr.resolvedOperator || expr.operator,
             key = expr.fieldName,
             val = rec[key],
             fo = op;
         if (typeof op === "string") {
             fo = DataUtil.findOperatorByName(op, expr);
-            expr.resolvedOperator = fo;
+            expr.resolvedOperator = fo; // if next time tries to find operator with the same name do NOT call 'findOperatorByName' -> use 'resolvedOperator'.
         }
-        if (typeof fo === "function") {
+        if (fo && typeof fo === "function") {
             return fo(val, expr, ignoreCase, rec);
         }
         throw new Error("Filtering operator is not implemented");
     }
-    // static groupby<T> (data: T[], expressions: GroupByExpression[]): T[] {
-    //     return data;
-    // }
+    /* //FILTERING */
 }
