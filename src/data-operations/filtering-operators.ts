@@ -1,12 +1,15 @@
 import {FilteringExpression} from "./filtering-expression.interface";
 
 export class FilteringOperators {
-    static applyIgnoreCase (a: string, ignore) : string {
+    static applyIgnoreCase (a: string, ignoreCase?: boolean, expr?: FilteringExpression) : string {
         if (a === null || a === undefined) {
             return "";
         }
         a = "" + a;
-        return ignore? a.toLowerCase() : a;
+        if (expr && expr.ignoreCase !== null && expr.ignoreCase !== undefined) {
+            ignoreCase = expr.ignoreCase;
+        }
+        return ignoreCase? a.toLowerCase() : a;
     }
     static getDateParts(date: Date, dateFormat?: string): 
                         {   year?: number, 
@@ -55,38 +58,38 @@ export class FilteringOperators {
     static string = {
         contains: function (val: string, expr: FilteringExpression, ignore?: boolean) : boolean
         {
-            var val = FilteringOperators.applyIgnoreCase(val, ignore), 
-                search = FilteringOperators.applyIgnoreCase(expr.searchVal, ignore);
+            var val = FilteringOperators.applyIgnoreCase(val, ignore, expr), 
+                search = FilteringOperators.applyIgnoreCase(expr.searchVal, ignore, expr);
             return val.indexOf(search) !== -1;
         },
         startsWith: function (val: string, expr: FilteringExpression, ignore?: boolean) : boolean
         {
-            var val = FilteringOperators.applyIgnoreCase(val, ignore), 
-                search = FilteringOperators.applyIgnoreCase(expr.searchVal, ignore);
+            var val = FilteringOperators.applyIgnoreCase(val, ignore, expr), 
+                search = FilteringOperators.applyIgnoreCase(expr.searchVal, ignore, expr);
             return val.startsWith(search);
         },
         endsWith: function (val: string, expr: FilteringExpression, ignore?: boolean) : boolean
         {
-            var val = FilteringOperators.applyIgnoreCase(val, ignore), 
-                search = FilteringOperators.applyIgnoreCase(expr.searchVal, ignore);
+            var val = FilteringOperators.applyIgnoreCase(val, ignore, expr), 
+                search = FilteringOperators.applyIgnoreCase(expr.searchVal, ignore, expr);
             return val.endsWith(search);
         },
         doesNotContain: function (val: string, expr: FilteringExpression, ignore?: boolean) : boolean
         {
-            var val = FilteringOperators.applyIgnoreCase(val, ignore), 
-                search = FilteringOperators.applyIgnoreCase(expr.searchVal, ignore);
+            var val = FilteringOperators.applyIgnoreCase(val, ignore, expr), 
+                search = FilteringOperators.applyIgnoreCase(expr.searchVal, ignore, expr);
             return val.indexOf(search) === -1;
         },
         equals: function (val: string, expr: FilteringExpression, ignore?: boolean) : boolean
         {
-            var val = FilteringOperators.applyIgnoreCase(val, ignore), 
-                search = FilteringOperators.applyIgnoreCase(expr.searchVal, ignore);
+            var val = FilteringOperators.applyIgnoreCase(val, ignore, expr), 
+                search = FilteringOperators.applyIgnoreCase(expr.searchVal, ignore, expr);
             return val === search;
         },
         doesNotEqual: function (val: string, expr: FilteringExpression, ignore?: boolean) : boolean
         {
-            var val = FilteringOperators.applyIgnoreCase(val, ignore), 
-                search = FilteringOperators.applyIgnoreCase(expr.searchVal, ignore);
+            var val = FilteringOperators.applyIgnoreCase(val, ignore, expr), 
+                search = FilteringOperators.applyIgnoreCase(expr.searchVal, ignore, expr);
             return val !== search;
         },
         null: function (val: string, expr: FilteringExpression, ignore?: boolean) : boolean

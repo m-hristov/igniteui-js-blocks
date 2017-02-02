@@ -10,6 +10,9 @@ import {DataUtil} from "./data-util";
  * 
  */
 const DATASOURCE_IGNORE_CASE: boolean = true;
+/**
+ * 
+ */
 export class DataSource {
     /**
      * 
@@ -29,7 +32,8 @@ export class DataSource {
     settings: {
         filtering?: {
             expressions?: Array<FilteringExpression>,
-            common?: FilteringSettings
+            boolLogic?: "and"|"or";
+            ignoreCase?: boolean;
         },
         sorting?: {
             expressions?: Array<SortingExpression>,
@@ -47,11 +51,13 @@ export class DataSource {
             applied: boolean;
         },
         sorting?: {
+            data: any[],
             applied?: boolean;
         },
         paging?: {
-            res: PagingData,
-            applied: boolean
+            data: any[],
+            applied: boolean,
+            pagingInfo: PagingData
         }
     } = {
         filtering: {
@@ -59,23 +65,16 @@ export class DataSource {
             applied: false
         },
         sorting: {
+            data: [],
             applied: false
         },
         paging: null
     };
-    
-    pagingData: PagingData;
-    filteringData: {
-        countFilteredRecords: number; 
-        filteredData: any[]
-    };
-    resetSettings(): void {
+    initSettings(): void {
         this.settings = {
             filtering: {
-                common: {
-                    boolLogic: 'and',
-                    ignoreCase: DATASOURCE_IGNORE_CASE
-                }
+                boolLogic: 'and',
+                ignoreCase: DATASOURCE_IGNORE_CASE
             },
             sorting: {
                 ignoreCase: DATASOURCE_IGNORE_CASE
@@ -86,14 +85,14 @@ export class DataSource {
     constructor (data: any[] = [], total?: number) {
         this.data = data;
         this.dataView = data;
-        this.resetSettings();
+        this.initSettings();
         if (total !== undefined && total !== null) {
             this.total = total;
         } else {
             this.total = (this.data && this.data.length) || 0;
         }
     }
-    resetResultData(): void {
+    private resetResultData(): void {
         // reset filtering result data
         this.resultData.filtering.data = [];
         this.resultData.filtering.applied = false;
@@ -103,14 +102,14 @@ export class DataSource {
         this.resultData.paging = null;
     }
     dataBind(): DataSource {
-        var ignoreCase: boolean, s = this.settings;
-        s = s || {};
+        var ignoreCase: boolean, s = this.settings || {};
         this.resetResultData();
         this.dataView = this.data;
         // apply data operations
         // apply filtering
         if (s.filtering && s.filtering.expressions && s.filtering.expressions.length) {
-            this.filter(s.filtering.expressions, s.filtering.common);
+            this.filter(s.filtering.expressions, 
+                        <FilteringSettings> {boolLogic: s.filtering.boolLogic, ignoreCase: s.filtering.ignoreCase});
         }
         // apply sorting
         if (s.sorting && s.sorting.expressions && s.sorting.expressions.length) {
@@ -122,7 +121,7 @@ export class DataSource {
         }
         return this;
     }
-    getRecordIndex (record: Object, data?: any[]): number {
+    getIndexOfRecord (record: Object, data?: any[]): number {
         data = data || this.data;
         return data.indexOf(record);
     }
@@ -135,7 +134,7 @@ export class DataSource {
     }
     getRecordInfoByKeyValue (fieldName: string, value: any, data?: any[]): {index: number, record: Object} {
         data = data || this.data;
-        var len = data.length, i, res = null;
+        var len = data.length, i, res = {index: -1, record: null};
         for (i = 0; i < len; i++) {
             if (data[i][fieldName] === value) {
                 return {
@@ -144,14 +143,16 @@ export class DataSource {
                 };
             }
         }
-        return null;
+        return res;
     }
+    // basic data operations
     sort (expressions: SortingExpression[], ignoreCase: boolean = true, data?: any[]): DataSource {
         data = data || this.dataView;
         var res = DataUtil.sort(data, expressions, ignoreCase);
         this.dataView = res;
         this.resultData = this.resultData || {};
         this.resultData.sorting = {
+            data: res,
             applied: true
         };
         return this;
@@ -175,7 +176,8 @@ export class DataSource {
         this.resultData = this.resultData || {};
         this.resultData.paging = {
             applied: true,
-            res: res
+            data: res.pageData,
+            pagingInfo: res
         };
         return this;
     }

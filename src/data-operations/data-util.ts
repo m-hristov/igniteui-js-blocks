@@ -8,7 +8,7 @@ import { ColumnDefinition } from "./column-definition.interface";
 export class DataUtil {
     static sort<T> (data: T[], expressions: SortingExpression[], 
                     ignoreCase: boolean = true): T[] {
-        if (!expressions || data.length <= 1) {
+        if (!expressions || !expressions.length || data.length <= 1) {
             return data;
         }
         return DataUtil.sortDataRecursive(data, expressions, null, ignoreCase);
@@ -17,7 +17,6 @@ export class DataUtil {
         var len = data.length, 
             res: PagingData = {
                 err: null,
-                data: data,
                 pageData: [],
                 pageCount: 0,
                 total: len,
@@ -29,7 +28,7 @@ export class DataUtil {
             return res;
         }
         if (pageSize <= 0 || isNaN(pageSize)) {
-            res.err = "pageSize should be number and should be greater than 0";
+            res.err = "pageSize should be positive number";
             return res;
         }
         res.pageCount = Math.ceil(len / pageSize);
@@ -44,6 +43,9 @@ export class DataUtil {
         var i, len = data.length, 
             res: T[] = [], 
             rec;
+        if (!expressions || !expressions.length || !len) {
+            return data;
+        }
         for (i = 0; i < len; i++) {
             rec = data[i];
             if (DataUtil.findMatchByExpressions(rec, expressions, settings)) {
@@ -84,7 +86,7 @@ export class DataUtil {
                 data: T[],
                 schema: Array<ColumnDefinition>,
                 clone: boolean = false): Array<any> {
-        if (!data || !schema || !schema.length) {
+        if (!data || !data.length || !schema || !schema.length) {
             return data;
         }
         var i, len = data.length, res = [], trec;
