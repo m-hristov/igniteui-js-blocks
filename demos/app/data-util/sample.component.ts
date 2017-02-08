@@ -1,10 +1,7 @@
 import { Component, Input, ViewChild, OnInit, DoCheck } from "@angular/core";
-import { DataSource } from "../../../src/data-operations/data-source";
-import { DataUtil } from "../../../src/data-operations/data-util";
-import { FilteringOperators } from "../../../src/data-operations/filtering-operators";
-import {FilteringExpression} from "../../../src/data-operations/filtering-expression.interface";
-import { SortingExpression} from "../../../src/data-operations/sorting-expression.interface";
-import { PagingData } from "../../../src/data-operations/paging-data.interface";
+import { DataSource, DataUtil, FilteringExpression, FilteringCondition, FilteringSettings, 
+    SortingExpression, BoolLogic, SortingDirection, SortingStrategy, MergeSortingStrategy } from "../../../src/main";
+
 @Component({
     selector: "data-iterator",
     moduleId: module.id,
@@ -70,34 +67,36 @@ export class DataUtilSampleComponent implements OnInit, DoCheck {
     @ViewChild("listFilteringData") listFilteringData: DataIterator;
     @ViewChild("listSortingData") listSortingData: DataIterator;
     @ViewChild("list") list: DataIterator;
+    @ViewChild("listUpdating") listUpdating: DataIterator;
     constructor() {
     }
     ngOnInit() {
-        this.data = this.generateData(8, 5);// generates 10 rows with 5 columns in each row
+        this.data = this.generateData(100000, 5);// generates 10 rows with 5 columns in each row
         this.dataSource = new DataSource(this.data.rows, this.data.rows.length);
-        this.renderList();
-        //this.renderPageData();
+        //this.renderListUpdating();
+        //this.renderList();
+        this.renderPageData();
         // this.renderFilterData();
         //this.renderSortedData();
     }
     ngDoCheck() {
-
     }
     getDefaultDSSettings() {
         var settings,
             // filtering expression
             fe = <FilteringExpression> {
-                                        operator: FilteringOperators.number.greaterThan,
+                                        condition: FilteringCondition.number.greaterThan,
                                         fieldName: "number",
-                                        "searchVal": 0},
+                                        searchVal: 1
+                                    },
             // sorting settings
             se0 = <SortingExpression> {
                                         fieldName: "number",
-                                        dir: "desc"
+                                        dir: SortingDirection.desc
                                     },
             se1 = <SortingExpression> {
                                         fieldName: "bool",
-                                        dir: "desc"
+                                        dir: SortingDirection.desc
                                     };
         return {
             filtering: {
@@ -108,21 +107,37 @@ export class DataUtilSampleComponent implements OnInit, DoCheck {
             }
         }
     }
+    deleteRecord() {
+        var ind = this.dataSource.data.length - 1;
+        if (ind >= 0) {
+            this.dataSource.deleteRecordByIndex(ind);
+        }
+    }
+    addRecord() {
+        this.dataSource.addRecord(this.createRecord(this.data.keys, this.data.rows.length));
+        this.dataSource.dataBind();
+    }
+    renderListUpdating() {
+        var ds = this.dataSource, cols = this.data.keys;
+        ds.dataBind();
+        this.listUpdating.dataSource = ds;
+        this.listUpdating.keys = cols;
+    }
     renderList() {
         var ds = this.dataSource,
             // filtering expression
             fe = <FilteringExpression> {
-                                        operator: FilteringOperators.number.greaterThan,
+                                        condition: FilteringCondition.number.greaterThan,
                                         fieldName: "number",
-                                        "searchVal": 0},
+                                        "searchVal": 1},
             // sorting settings
             se0 = <SortingExpression> {
                                         fieldName: "number",
-                                        dir: "desc"
+                                        dir: SortingDirection.desc
                                     },
             se1 = <SortingExpression> {
                                         fieldName: "bool",
-                                        dir: "desc"
+                                        dir: SortingDirection.desc
                                     },
             res,
             t = new Date().getTime(),
@@ -140,7 +155,7 @@ export class DataUtilSampleComponent implements OnInit, DoCheck {
         this.list.keys = keys;
     }
     reset() {
-        this.dataSource.resetSettings();
+        this.dataSource.initSettings();
         this.dataSource.dataBind();
     }
     rebind() {
@@ -153,28 +168,34 @@ export class DataUtilSampleComponent implements OnInit, DoCheck {
             pageSize = p.pageSize,
             // filtering expression
             fe = <FilteringExpression> {
-                                        //caseSensitive: false, 
-                                        operator: FilteringOperators.number.greaterThan,
+                                        condition: FilteringCondition.number.greaterThan,
                                         fieldName: "number",
-                                        "searchVal": 100},
+                                        "searchVal": 1},
             // sorting settings
             se0 = <SortingExpression> {
                                         fieldName: "number",
-                                        dir: "desc"
+                                        dir: SortingDirection.desc
                                     },
             se1 = <SortingExpression> {
-                                        fieldName: "col2",
-                                        dir: "desc"
+                                        // fieldName: "col2",
+                                        dir: SortingDirection.desc
                                     },
             res,
             t = new Date().getTime(),
             keys = this.data.keys;// generates 10 rows with 3 columns in each row;
+        var fs:FilteringSettings = {
+            boolLogic: BoolLogic.and,
+            ignoreCase: false
+        };
         this.dataSource
             .dataBind()
-            .filter([fe], true)
-            //.sort([se0/*, se1 */], true)
+            .filter(
+                [fe], 
+                <FilteringSettings>{boolLogic:BoolLogic.and}
+            )
+            .sort([se0/*, se1 */], null, new MergeSortingStrategy())
             .page(pageIndex, pageSize);
-        res = this.dataSource.resultData.paging.res;
+        res = this.dataSource.resultData.paging.pagingData;
         p.pageInfo = res.err || `Page: ${pageIndex + 1} of ${res.pageCount} page(s) | 
                                 Total rows count: ${res.total} | 
                                 Time: ${new Date().getTime() - t} ms.`;
@@ -191,7 +212,7 @@ export class DataUtilSampleComponent implements OnInit, DoCheck {
         var t = new Date().getTime(),
             fe = <FilteringExpression> {
                                         ignoreCase: true, 
-                                        operator: "today",
+                                        condition: FilteringCondition.date.after,
                                         fieldName: "date",
                                         "searchVal": this.filtering.searchVal},
             res = DataUtil.filter(this.data.rows, [fe] );
@@ -202,14 +223,14 @@ export class DataUtilSampleComponent implements OnInit, DoCheck {
     renderSortedData() {
         var t = new Date().getTime(),
             se0 = <SortingExpression> {
-                                        fieldName: this.sorting.key || "col1",
-                                        dir: "desc"
+                                        fieldName: this.sorting.key || "number",
+                                        dir: SortingDirection.desc
                                     },
             se1 = <SortingExpression> {
                                         fieldName: "col2",
-                                        dir: "desc"
+                                        dir: SortingDirection.desc
                                     };
-        this.listSortingData.data = DataUtil.sort(this.data.rows, [se0, se1]);
+        this.listSortingData.data = DataUtil.sort(this.data.rows, [se0]);
         this.listSortingData.keys = this.data.keys;
         this.sorting.info = `Sorting time: ${new Date().getTime() - t} ms.`;
     }
@@ -228,13 +249,9 @@ export class DataUtilSampleComponent implements OnInit, DoCheck {
         return cols.concat(predCols);
 
     }
-    generateData(countRows?: number, countCols?: number) {
-        countCols = countCols || 1;
-        countRows = countRows || 0;
-        var i, j, data = [], row, cols = this.generateColumns(countCols), key;
-        for (i = 0; i < countRows; i++) {
-            row = {};
-            for (j = 0; j < countCols; j++) {
+    createRecord(cols, i) {
+        var j, len = cols.length, key, row = {};
+        for (j = 0; j < len; j++) {
                 key = cols[j];
                 if (key === "date") {
                     row[key] = new Date((new Date()).setDate(i));
@@ -246,7 +263,14 @@ export class DataUtilSampleComponent implements OnInit, DoCheck {
                     row[key] = `row ${i} col ${j}`;
                 }
             }
-            data.push(row);
+        return row;
+    }
+    generateData(countRows?: number, countCols?: number) {
+        countCols = countCols || 1;
+        countRows = countRows || 0;
+        var i, j, data = [], row, cols = this.generateColumns(countCols), key;
+        for (i = 0; i < countRows; i++) {
+            data.push(this.createRecord(cols, i));
         }
         return {
             rows: data,

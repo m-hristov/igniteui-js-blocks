@@ -1,10 +1,15 @@
-import { FilteringExpression } from "./filtering-expression.interface";
-import { FilteringOperators } from "./filtering-operators";
+import { FilteringExpression, BoolLogic } from "./filtering-expression.interface";
+import { FilteringCondition } from "./filtering-condition";
 import { FilteringSettings } from "./filtering-settings.interface";
+import { FilteringStrategy, IFilteringStrategy} from "./filtering-strategy";
 import { SortingExpression } from "./sorting-expression.interface";
+import {SortingStrategy} from "./sorting-strategy";
+import {ISortingStrategy} from "./sorting-strategy.interface";
 import { PagingData } from "./paging-data.interface";
 import { ColumnDefinition } from "./column-definition.interface";
 import {DataUtil} from "./data-util";
+import {DataSourceSettings} from "./data-source-settings.interface";
+import {DataSourceResultData} from "./data-source-result-data.interface";
 
 /**
  * 
@@ -29,37 +34,9 @@ export class DataSource {
     dataView: any[];
 
     // settings
-    settings: {
-        filtering?: {
-            expressions?: Array<FilteringExpression>,
-            boolLogic?: "and"|"or";
-            ignoreCase?: boolean;
-        },
-        sorting?: {
-            expressions?: Array<SortingExpression>,
-            ignoreCase?: boolean
-        },
-        paging?: {
-            disabled?: boolean,
-            pageIndex: number,
-            pageSize: number
-        }
-    };
-    resultData: {
-        filtering?: {
-            data: any[];
-            applied: boolean;
-        },
-        sorting?: {
-            data: any[],
-            applied?: boolean;
-        },
-        paging?: {
-            data: any[],
-            applied: boolean,
-            pagingInfo: PagingData
-        }
-    } = {
+    settings: DataSourceSettings;
+    // result data
+    resultData: DataSourceResultData = {
         filtering: {
             data: [],
             applied: false
@@ -73,12 +50,9 @@ export class DataSource {
     initSettings(): void {
         this.settings = {
             filtering: {
-                boolLogic: 'and',
+                boolLogic: BoolLogic.and,
                 ignoreCase: DATASOURCE_IGNORE_CASE
             },
-            sorting: {
-                ignoreCase: DATASOURCE_IGNORE_CASE
-            }, 
             paging: null
         };
     }
@@ -109,15 +83,17 @@ export class DataSource {
         // apply filtering
         if (s.filtering && s.filtering.expressions && s.filtering.expressions.length) {
             this.filter(s.filtering.expressions, 
-                        <FilteringSettings> {boolLogic: s.filtering.boolLogic, ignoreCase: s.filtering.ignoreCase});
+                        <FilteringSettings> {boolLogic: s.filtering.boolLogic, ignoreCase: s.filtering.ignoreCase},
+                        this.data,
+                        s.filtering.strategy);
         }
         // apply sorting
         if (s.sorting && s.sorting.expressions && s.sorting.expressions.length) {
-            this.sort(s.sorting.expressions, s.sorting.ignoreCase);
+            this.sort(s.sorting.expressions, this.dataView, s.sorting.strategy);
         }
         // apply paging
         if (s.paging && !s.paging.disabled) {
-            this.page(s.paging.pageIndex, s.paging.pageSize);
+            this.page(s.paging.pageIndex, s.paging.pageSize, this.dataView);
         }
         return this;
     }
@@ -146,9 +122,9 @@ export class DataSource {
         return res;
     }
     // basic data operations
-    sort (expressions: SortingExpression[], ignoreCase: boolean = true, data?: any[]): DataSource {
+    sort (expressions: SortingExpression[], data?: any[], strategy?: ISortingStrategy): DataSource {
         data = data || this.dataView;
-        var res = DataUtil.sort(data, expressions, ignoreCase);
+        var res = DataUtil.sort(data, expressions, strategy);
         this.dataView = res;
         this.resultData = this.resultData || {};
         this.resultData.sorting = {
@@ -157,10 +133,10 @@ export class DataSource {
         };
         return this;
     }
-    filter (expressions: FilteringExpression[], settings?: FilteringSettings, data?: any[]): DataSource {
+    filter (expressions: FilteringExpression[], settings?: FilteringSettings, data?: any[], strategy?: IFilteringStrategy): DataSource {
         var res;
-        data = data || this.data;
-        res = DataUtil.filter(data, expressions, settings);
+        data = data || this.dataView;
+        res = DataUtil.filter(data, expressions, settings, strategy);
         this.resultData = this.resultData || {};
         this.resultData.filtering = {
             data: res,
@@ -177,7 +153,7 @@ export class DataSource {
         this.resultData.paging = {
             applied: true,
             data: res.pageData,
-            pagingInfo: res
+            pagingData: res
         };
         return this;
     }

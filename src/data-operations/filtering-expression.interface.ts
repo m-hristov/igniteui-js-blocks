@@ -1,15 +1,16 @@
+import { FilteringCondition } from "./filtering-condition";
+export enum BoolLogic {
+    and,
+    or
+};
+
 /**
  * Represents filtering expressions.
  */
 export interface FilteringExpression {
    fieldName: string;
-   operator: string | Function;
+   condition: FilteringCondition|Function;
    searchVal?: any;
    ignoreCase?: boolean;
-   type?: "string"|"number"|"boolean"|"date";
    dateFormat?: "string";
-   /**
-    * @hidden
-    */
-   resolvedOperator?: Function;
 }

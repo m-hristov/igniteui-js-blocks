@@ -5,7 +5,7 @@ import {
 import { Component, ViewChild } from "@angular/core";
 import { FormsModule } from '@angular/forms';
 import { By } from "@angular/platform-browser";
-import { DataUtil, DataSource, FilteringOperators, FilteringSettings, PagingData, SortingExpression } from "../main";
+import { DataUtil, DataSource, FilteringCondition, FilteringSettings, PagingData, SortingExpression, SortingDirection } from "../main";
 
 describe('Unit testing DataUtil', () => {
     var data;
@@ -20,7 +20,7 @@ describe('Unit testing DataUtil', () => {
             var i, res, err = null,
                 se = <SortingExpression> {
                 fieldName: "number",
-                dir: "desc"
+                dir: SortingDirection.asc
             };
             res = DataUtil.sort(data, [se]);
             for (i = 0; i < ROWS_COUNT; i++) {
@@ -35,7 +35,7 @@ describe('Unit testing DataUtil', () => {
             var i, res, err = null, setTrue = 0, setFalse = 0,
                 se = <SortingExpression> {
                 fieldName: "boolean",
-                dir: "asc"
+                dir: SortingDirection.asc
             };
             res = DataUtil.sort(data, [se]);
             for (i = 0; i < ROWS_COUNT; i++) {
@@ -53,11 +53,11 @@ describe('Unit testing DataUtil', () => {
                 map = [1, 3, 0, 2, 4],
                 se0 = <SortingExpression> {
                     fieldName: "boolean",
-                    dir: "desc"
+                    dir: SortingDirection.desc
                 },
                 se1 = <SortingExpression> {
                     fieldName: "datetime",
-                    dir: "asc"
+                    dir: SortingDirection.asc
                 };
             res = DataUtil.sort(data, [se0, se1]);
             for (i = 0; i < ROWS_COUNT; i++) {
@@ -72,19 +72,7 @@ describe('Unit testing DataUtil', () => {
         it ('sorts using custom sorting function', () => {
             var i, err, res, se0 = <SortingExpression> {
                     fieldName: "number",
-                    dir: "desc",
-                    compareFunc: (a, b) => {
-                        var aE = !(a % 2),
-                            bE = !(b % 2);
-                        if ((aE && bE) || (!aE && !bE)) {
-                            return a > b ? 1 : (a < b) ? -1: 0;
-                        }
-                        if (aE) {
-                            return 1;
-                        }
-                        // b is even
-                        return -1;
-                    }
+                    dir: SortingDirection.asc
                 },  map = [1, 3, 0, 2, 4];
             res = DataUtil.sort(data, [se0]);
             for (i = 0; i < ROWS_COUNT; i++) {

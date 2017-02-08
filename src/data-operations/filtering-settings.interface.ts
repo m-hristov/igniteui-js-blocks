@@ -1,4 +1,7 @@
+import {BoolLogic} from "./filtering-expression.interface"
+
 export interface FilteringSettings {
-    boolLogic?: "and"|"or";
+    boolLogic?: BoolLogic;
     ignoreCase?: boolean;
+    customFiltering?: Function;
 }

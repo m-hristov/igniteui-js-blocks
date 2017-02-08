@@ -31,7 +31,7 @@
 
     <hr />
 
-    <h4>Sorting</h4>
+    <h4>Sorting:</h4>
     <div class="igx-form-group">
         <input width="100" igxInput type="text" [(ngModel)]="sorting.key"/> <label igxLabel>Column Key: </label> 
     </div>
@@ -40,5 +40,8 @@
 
     <data-iterator #listSortingData></data-iterator>
     
-    
+    <h4>Updating</h4>
+    <button igxButton="raised" igxButtonColor="white" igxButtonBackground="#4CAF50" igxRipple="white" (click)="addRecord()">Add record</button>
+    <button igxButton="raised" igxButtonColor="white" igxButtonBackground="#4CAF50" igxRipple="white" (click)="deleteRecord()">Delete last record</button>
+    <data-iterator #listUpdating></data-iterator>
 <hr>
