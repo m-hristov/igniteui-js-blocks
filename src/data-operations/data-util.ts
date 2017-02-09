@@ -49,7 +49,7 @@ export class DataUtil {
                                         expressions?: FilteringExpression[], settings?: FilteringSettings
                                     },
                                     sorting?: {
-                                        expressions?: SortingExpression[], ignoreCase?: boolean
+                                        expressions?: SortingExpression[]
                                     }
                                     paging?: {pageIndex: number, pageSize: number}
                                 }
@@ -64,7 +64,7 @@ export class DataUtil {
         }
         s = settings.sorting;
         if (s && s.expressions && s.expressions.length) {
-            data = DataUtil.sort(data, s.expressions, s.ignoreCase);
+            data = DataUtil.sort(data, s.expressions);
         }
         p = settings.paging;
         if (p) {
@@ -90,8 +90,6 @@ export class DataUtil {
         }
         return clone ? res : data;
     }
-    /* HELPER FUNCTIONS */
-    
     /* SCHEMA TRANSFORM */
     static transformRecord<T>(record: T,
                                     schema: Array<ColumnDefinition>,

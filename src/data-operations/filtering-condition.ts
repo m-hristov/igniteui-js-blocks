@@ -5,7 +5,6 @@ export class FilteringCondition {
         if (a === null || a === undefined) {
             return "";
         }
-        a = "" + a;
         if (expr && expr.ignoreCase !== null && expr.ignoreCase !== undefined) {
             ignoreCase = expr.ignoreCase;
         }

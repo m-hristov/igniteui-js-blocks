@@ -2,16 +2,16 @@ import { PagingData } from "./paging-data.interface";
 
 export interface DataSourceResultData {
     filtering?: {
-        data: any[];
+        transformedData: any[];
         applied: boolean;
     },
     sorting?: {
-        data: any[],
+        transformedData: any[],
         applied: boolean;
     },
     paging?: {
-        data: any[],
+        transformedData: any[],
         applied: boolean,
-        pagingData: PagingData
+        metadata: PagingData
     }
 }

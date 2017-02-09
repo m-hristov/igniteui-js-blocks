@@ -38,11 +38,11 @@ export class DataSource {
     // result data
     resultData: DataSourceResultData = {
         filtering: {
-            data: [],
+            transformedData: [],
             applied: false
         },
         sorting: {
-            data: [],
+            transformedData: [],
             applied: false
         },
         paging: null
@@ -53,6 +53,7 @@ export class DataSource {
                 boolLogic: BoolLogic.and,
                 ignoreCase: DATASOURCE_IGNORE_CASE
             },
+            sorting: {},
             paging: null
         };
     }
@@ -68,7 +69,7 @@ export class DataSource {
     }
     private resetResultData(): void {
         // reset filtering result data
-        this.resultData.filtering.data = [];
+        this.resultData.filtering.transformedData = [];
         this.resultData.filtering.applied = false;
         // reset sorting result data
         this.resultData.sorting.applied = false;
@@ -98,18 +99,18 @@ export class DataSource {
         return this;
     }
     getIndexOfRecord (record: Object, data?: any[]): number {
-        data = data || this.data;
+        data = data || this.data || [];
         return data.indexOf(record);
     }
     getRecordByIndex (index: number, data?: any[]) {
         if (index < 0) {
             return null;
         }
-        data = data || this.data;
+        data = data || this.data || [];
         return data[index] || null;
     }
     getRecordInfoByKeyValue (fieldName: string, value: any, data?: any[]): {index: number, record: Object} {
-        data = data || this.data;
+        data = data || this.data || [];
         var len = data.length, i, res = {index: -1, record: null};
         for (i = 0; i < len; i++) {
             if (data[i][fieldName] === value) {
@@ -128,7 +129,7 @@ export class DataSource {
         this.dataView = res;
         this.resultData = this.resultData || {};
         this.resultData.sorting = {
-            data: res,
+            transformedData: res,
             applied: true
         };
         return this;
@@ -139,7 +140,7 @@ export class DataSource {
         res = DataUtil.filter(data, expressions, settings, strategy);
         this.resultData = this.resultData || {};
         this.resultData.filtering = {
-            data: res,
+            transformedData: res,
             applied: true
         };
         this.dataView = res;
@@ -152,8 +153,8 @@ export class DataSource {
         this.resultData = this.resultData || {};
         this.resultData.paging = {
             applied: true,
-            data: res.pageData,
-            pagingData: res
+            transformedData: res.pageData,
+            metadata: res
         };
         return this;
     }
