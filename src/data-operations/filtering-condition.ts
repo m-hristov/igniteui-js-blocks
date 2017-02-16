@@ -2,9 +2,7 @@ import {FilteringExpression} from "./filtering-expression.interface";
 
 export class FilteringCondition {
     static applyIgnoreCase (a: string, ignoreCase?: boolean, expr?: FilteringExpression) : string {
-        if (a === null || a === undefined) {
-            return "";
-        }
+        a = a || "";
         if (expr && expr.ignoreCase !== null && expr.ignoreCase !== undefined) {
             ignoreCase = expr.ignoreCase;
         }
@@ -240,34 +238,7 @@ export class FilteringCondition {
             return  d.year === now.year + 1;
         },
         on: function (val: Date, expr: FilteringExpression) : boolean {
-            var match = true,
-                d = FilteringCondition.getDateParts(val, expr.dateFormat), 
-                search = FilteringCondition.getDateParts(expr.searchVal, expr.dateFormat);
-            if (!expr.dateFormat) {
-                return val === expr.searchVal;
-            }
-            if (d.year !== null) {
-                match = match && (d.year === search.year);
-            }
-            if (d.month !== null) {
-                match = match && (d.month === search.month);
-            }
-            if (d.day !== null) {
-                match = match && (d.day === search.day);
-            }
-            if (d.hours !== null) {
-                match = match && (d.hours === search.hours);
-            }
-            if (d.minutes !== null) {
-                match = match && (d.minutes === search.minutes);
-            }
-            if (d.seconds !== null) {
-                match = match && (d.seconds === search.seconds);
-            }
-            if (d.milliseconds !== null) {
-                match = match && (d.milliseconds === search.milliseconds);
-            }
-            return match;
+            return val === expr.searchVal;
         },
         notOn: function (val: Date, expr: FilteringExpression) : boolean {
             return !FilteringCondition.date.on(val, expr);

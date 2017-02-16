@@ -1,6 +1,37 @@
-import { Component, Input, ViewChild, OnInit, DoCheck } from "@angular/core";
-import { DataSource, DataUtil, FilteringExpression, FilteringCondition, FilteringSettings, 
-    SortingExpression, BoolLogic, SortingDirection, SortingStrategy, StableSortingStrategy } from "../../../src/main";
+import { Component, Input, ViewChild, OnInit, DoCheck, Injectable } from "@angular/core";
+import { DataContainer, DataUtil, DataState, FilteringExpression, FilteringCondition, PagingError,
+    FilteringState, SortingExpression, FilteringLogic, SortingDirection, SortingStrategy } from "../../../src/main";
+import {StableSortingStrategy} from "../../../src/data-operations/stable-sorting-strategy"
+import { Observable, BehaviorSubject } from 'rxjs/Rx';
+import { Http } from '@angular/http';
+
+// service 
+/* Example service */
+@Injectable()
+export class DataService extends BehaviorSubject<DataContainer> {
+    private url: string = 'http://services.odata.org/V4/Northwind/Northwind.svc/Categories?$skip=5&$top=5&$count=true';
+    
+    constructor(private http: Http) {
+        super(null);
+    }
+    public getData(): void {
+        this.fetch()
+            .subscribe(x => super.next(x));
+    }
+    private fetch(): Observable<DataContainer> {
+        return this.http
+            .get(this.url)
+            .map(response => response.json())
+            .map(function (response) {
+                return (<DataContainer>{
+                    data: response.value,
+                    transformedData: response.value,
+                    total: parseInt(response["@odata.count"], 10)
+                });
+            });
+    }
+}
+
 
 const __data = [{
         "id": 1,
@@ -876,7 +907,7 @@ const __data2 = [{
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let dataRow of dataSource? dataSource.dataView : (data || [])" >
+            <tr *ngFor="let dataRow of dataContainer? dataContainer.transformedData : (data || [])" >
                 <td *ngFor="let key of keys">
                     {{dataRow[key]}}
                 </td>
@@ -887,19 +918,21 @@ const __data2 = [{
 export class DataIterator {
     @Input() data: Object[] = [];
     @Input() keys: string[] = [];
-    @Input() dataSource: DataSource;
+    @Input() dataContainer: DataContainer;
 }
 
 @Component({
+    providers: [DataService],
     selector: "data-util-sample",
     moduleId: module.id,
     templateUrl: './sample.component.html'
 })
 export class DataUtilSampleComponent implements OnInit, DoCheck {
+    remoteData: Observable<DataContainer>;
     data: any;
-    dataSource: DataSource;
-    ds2: DataSource;
-    dataSourceSettings;
+    dataContainer: DataContainer;
+    ds2: DataContainer;
+    DataContainerSettings;
     private paging = {
         pageSize: 5,
         pageIndex: 0,
@@ -914,19 +947,27 @@ export class DataUtilSampleComponent implements OnInit, DoCheck {
         dir: "desc",
         info: ""
     };
+    
     // paging sample vars
+    @ViewChild("listRemoteData") listRemoteData: DataIterator;
     @ViewChild("listPagingData") listPagingData: DataIterator;
     @ViewChild("listFilteringData") listFilteringData: DataIterator;
     @ViewChild("listSortingData") listSortingData: DataIterator;
     @ViewChild("list") list: DataIterator;
     @ViewChild("listUpdating") listUpdating: DataIterator;
-    constructor() {
+    constructor(private service:DataService) {
+        this.remoteData = service;
     }
     ngOnInit() {
+        this.listRemoteData.keys = ["CategoryID", "CategoryName", "Description"];
+        this.service.getData();
+        
+        
         this.data = this.generateData(100000, 5);// generates 10 rows with 5 columns in each row
-        this.dataSource = new DataSource(this.data.rows, this.data.rows.length);
+        this.dataContainer = new DataContainer(this.data.rows, this.data.rows.length);
+        this.data.rows[0].number = 10000;
         //this.renderListUpdating();
-        this.renderList();
+        //this.renderList();
         this.renderPageData();
         // this.renderFilterData();
         //this.renderSortedData();
@@ -960,19 +1001,19 @@ export class DataUtilSampleComponent implements OnInit, DoCheck {
         }
     }
     deleteRecord() {
-        var ind = this.dataSource.data.length - 1;
+        var ind = this.dataContainer.data.length - 1;
         if (ind >= 0) {
-            this.dataSource.deleteRecordByIndex(ind);
+            this.dataContainer.deleteRecordByIndex(ind);
         }
     }
     addRecord() {
-        this.dataSource.addRecord(this.createRecord(this.data.keys, this.data.rows.length));
-        this.dataSource.dataBind();
+        this.dataContainer.addRecord(this.createRecord(this.data.keys, this.data.rows.length));
+        this.dataContainer.process();
     }
     renderListUpdating() {
-        var ds = this.dataSource, cols = this.data.keys;
-        ds.dataBind();
-        this.listUpdating.dataSource = ds;
+        var ds = this.dataContainer, cols = this.data.keys;
+        ds.process();
+        this.listUpdating.dataContainer = ds;
         this.listUpdating.keys = cols;
     }
     renderList() {
@@ -991,30 +1032,30 @@ export class DataUtilSampleComponent implements OnInit, DoCheck {
                                         fieldName: "bool",
                                         dir: SortingDirection.desc
                                     };// generates 10 rows with 3 columns in each row;
-        this.ds2 = new DataSource(__data);
-        
-        this.ds2.settings.sorting.expressions = [se0];
-        this.ds2.settings.sorting.strategy = new StableSortingStrategy();
-        this.ds2.dataBind();
+        this.ds2 = new DataContainer(__data);
+        this.ds2.state.sorting = {
+            expressions: [se0],
+            strategy: new StableSortingStrategy()
+        };
+        this.ds2.process();
 
         for (col in row) {
             if (row.hasOwnProperty(col)) {
                 cols.push(col);
             }
         }
-        this.list.dataSource = this.ds2;
+        this.list.dataContainer = this.ds2;
         this.list.keys = cols;
     }
     reset() {
-        this.dataSource.initSettings();
-        this.dataSource.dataBind();
+        this.dataContainer.process();
     }
     rebind() {
-        this.dataSource.settings = this.getDefaultDSSettings();
-        this.dataSource.dataBind();
+        this.dataContainer.process();
     }
     renderPageData() {
         var p = this.paging,
+            metadata, error,
             pageIndex = p.pageIndex,
             pageSize = p.pageSize,
             // filtering expression
@@ -1034,39 +1075,41 @@ export class DataUtilSampleComponent implements OnInit, DoCheck {
             res,
             t = new Date().getTime(),
             keys = this.data.keys;// generates 10 rows with 3 columns in each row;
-        var fs:FilteringSettings = {
-            boolLogic: BoolLogic.and,
-            ignoreCase: false
+        var fs:FilteringState = {
+            expressions: [fe],
+            logic: FilteringLogic.And
         };
-        this.dataSource
-            .dataBind()
-            .filter(
-                [fe], 
-                <FilteringSettings>{boolLogic:BoolLogic.and}
-            )
-            .sort([se0/*, se1 */], null, new StableSortingStrategy())
-            .page(pageIndex, pageSize);
-        res = this.dataSource.resultData.paging.metadata;
-        p.pageInfo = res.err || `Page: ${pageIndex + 1} of ${res.pageCount} page(s) | 
-                                Total rows count: ${res.total} | 
+        this.dataContainer
+            .process({
+              filtering: {
+                expressions: [fe]
+              },
+              paging: {
+                  index:pageIndex,
+                  recordsPerPage: pageSize
+              }
+            });
+        metadata = this.dataContainer.state.paging.metadata;
+        error = metadata.error !== PagingError.None;
+        p.pageInfo = error ? "Incorrect arguments" : `Page: ${pageIndex + 1} of ${metadata.countPages} page(s) |
+                                Total records: ${metadata.countRecords}
                                 Time: ${new Date().getTime() - t} ms.`;
-        this.listPagingData.dataSource = this.dataSource;
+        this.listPagingData.dataContainer = this.dataContainer;
         this.listPagingData.keys = keys;
     }
     test () {
         var dv = this.data.rows;
-        this.dataSource.dataView[0]["number"] = -1000;
-        dv = this.dataSource.dataView;
+        this.dataContainer.transformedData[0]["number"] = -1000;
+        dv = this.dataContainer.transformedData;
         (dv[0] || {})["col2"] = "Teeeest";
     }
     renderFilterData() {
         var t = new Date().getTime(),
-            fe = <FilteringExpression> {
-                                        ignoreCase: true, 
+            fe: FilteringExpression ={
                                         condition: FilteringCondition.date.after,
                                         fieldName: "date",
                                         "searchVal": this.filtering.searchVal},
-            res = DataUtil.filter(this.data.rows, [fe] );
+            res = DataUtil.filter(this.data.rows, {expressions: [fe], logic: FilteringLogic.And  });
         this.filtering.info = `Time to filter ${new Date().getTime() - t}`;
         this.listFilteringData.data = res;
         this.listFilteringData.keys = this.data.keys;
@@ -1081,7 +1124,7 @@ export class DataUtilSampleComponent implements OnInit, DoCheck {
                                         fieldName: "col2",
                                         dir: SortingDirection.desc
                                     };
-        this.listSortingData.data = DataUtil.sort(this.data.rows, [se0]);
+        this.listSortingData.data = DataUtil.sort(this.data.rows, { expressions: [se0, se1]});
         this.listSortingData.keys = this.data.keys;
         this.sorting.info = `Sorting time: ${new Date().getTime() - t} ms.`;
     }

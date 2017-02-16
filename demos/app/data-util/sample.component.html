@@ -1,6 +1,17 @@
 <h3>Data utils:</h3>
-    <h4>DataSource</h4>
-    <button igxButton="raised" (click)="this.ds2.dataBind()">DataBind</button>
+    <h4>Remote DataSource</h4>
+    <button igxButton="raised" (click)="this.ds2.process()">DataBind</button>
+    <!--<table>
+        <tr *ngFor="let dataRow of ((remoteData|async) || {}).transformedData">
+            <td *ngFor="let key of listRemoteData.keys">
+                {{dataRow[key]}}
+            </td>
+        </tr>
+    </table>-->
+    <data-iterator #listRemoteData [dataContainer]="remoteData|async"></data-iterator>
+
+    <h4>Consume data from a service</h4>
+    <button igxButton="raised" (click)="this.ds2.process()">DataBind</button>
     <data-iterator #list></data-iterator>
 
     <h4>Paging:</h4>

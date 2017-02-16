@@ -1,5 +1,10 @@
 import { SortingExpression, SortingDirection } from "./sorting-expression.interface";
-import { ISortingStrategy } from "./sorting-strategy.interface";
+
+export interface ISortingStrategy {
+    sort: (data: any[], expressions: SortingExpression[]) => any[];
+    compareValues: (a: any, b: any) => number;
+}
+
 
 export class SortingStrategy implements ISortingStrategy {
     ignoreCase: boolean = true;
@@ -28,35 +33,39 @@ export class SortingStrategy implements ISortingStrategy {
         }
         return res;
     }
-    compareFunction(obj1: any, obj2: any, 
-                    key: string, reverse: number, ignoreCase: boolean) {
-        var a = obj1[key], b = obj2[key], arr1, arr2,
-            aNull = (a === null || a === undefined),
-            bNull = (b === null || b === undefined);
-        if (aNull) {
-            if (bNull) {
+    compareValues(a: any, b: any) {
+        var an = (a === null || a === undefined),
+            bn = (b === null || b === undefined);
+        if (an) {
+            if (bn) {
                 return 0;
             }
-            return reverse * -1;
-        } else if (bNull) {
-            return reverse * 1;
+            return -1;
+        } else if (bn) {
+            return 1;
         }
-        if (ignoreCase) {
-            a = a.toLowerCase();
-            b = b.toLowerCase();
-        }
-        return reverse * (a > b ? 1 : a < b ? -1 : 0);
+        return a > b ? 1 : a < b ? -1 : 0;
     }
-
+    compareObjects(obj1: Object, obj2: Object, key: string, reverse: number, ignoreCase: boolean) {
+        var a = obj1[key], b = obj2[key];
+        if (ignoreCase) {
+            a = a && a.toLowerCase ? a.toLowerCase() : a;
+            b = b && b.toLowerCase ? b.toLowerCase() : b;
+        }
+        return reverse * this.compareValues(a, b);
+    }
     private sortByFieldExpression<T> (data: T[], expression: SortingExpression): T[] {
         var arr = [], sortF, self = this,
             key = expression.fieldName,
-            ignoreCase = expression.ignoreCase ? data[0] && typeof data[0][key] === "string": false,
-            compFunc = function(obj1, obj2) {
-                let reverse = (expression.dir === SortingDirection.desc? -1 : 1);
-                return self.compareFunction(obj1, obj2, key, reverse, ignoreCase);
+            ignoreCase = expression.ignoreCase ? 
+                            data[0] && (typeof data[0][key] === "string" || data[0][key] === null || data[0][key] === undefined): 
+                            false,
+            reverse = (expression.dir === SortingDirection.desc? -1 : 1),
+            cmpFunc = expression.compareFunction;
+            cmpFunc = cmpFunc || function(obj1, obj2) {
+                return self.compareObjects(obj1, obj2, key, reverse, ignoreCase);
             };
-        return this.arraySort(data, compFunc);
+        return this.arraySort(data, cmpFunc);
     }
 
     private sortDataRecursive<T> (data: T[],

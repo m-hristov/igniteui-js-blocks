@@ -1,9 +1,8 @@
 import { SortingStrategy } from "./sorting-strategy";
 
 export class StableSortingStrategy extends SortingStrategy {
-    compareFunction(obj1: any, obj2: any,
-                    key: string, reverse: number, ignoreCase: boolean): number {
-        var res = super.compareFunction.apply(this, arguments), 
+    compareObjects(obj1: any, obj2: any): number {
+        var res = super.compareObjects.apply(this, arguments), 
             replacerFn = function (key, val) { 
                             if (val === undefined)
                                 return null;
