@@ -2,8 +2,8 @@
  * Represents sorting expressions.
  */
 export enum SortingDirection {
-    asc = 1,
-    desc = 2
+    Asc = 1,
+    Desc = 2
 }
 
 export interface SortingExpression {

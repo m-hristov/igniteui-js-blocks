@@ -985,11 +985,11 @@ export class DataUtilSampleComponent implements OnInit, DoCheck {
             // sorting settings
             se0 = <SortingExpression> {
                                         fieldName: "number",
-                                        dir: SortingDirection.desc
+                                        dir: SortingDirection.Desc
                                     },
             se1 = <SortingExpression> {
                                         fieldName: "bool",
-                                        dir: SortingDirection.desc
+                                        dir: SortingDirection.Desc
                                     };
         return {
             filtering: {
@@ -1026,11 +1026,11 @@ export class DataUtilSampleComponent implements OnInit, DoCheck {
             // sorting settings
             se0 = <SortingExpression> {
                                         fieldName: "first_name",
-                                        dir: SortingDirection.desc
+                                        dir: SortingDirection.Desc
                                     },
             se1 = <SortingExpression> {
                                         fieldName: "bool",
-                                        dir: SortingDirection.desc
+                                        dir: SortingDirection.Desc
                                     };// generates 10 rows with 3 columns in each row;
         this.ds2 = new DataContainer(__data);
         this.ds2.state.sorting = {
@@ -1066,11 +1066,11 @@ export class DataUtilSampleComponent implements OnInit, DoCheck {
             // sorting settings
             se0 = <SortingExpression> {
                                         fieldName: "number",
-                                        dir: SortingDirection.desc
+                                        dir: SortingDirection.Desc
                                     },
             se1 = <SortingExpression> {
                                         // fieldName: "col2",
-                                        dir: SortingDirection.desc
+                                        dir: SortingDirection.Desc
                                     },
             res,
             t = new Date().getTime(),
@@ -1118,11 +1118,11 @@ export class DataUtilSampleComponent implements OnInit, DoCheck {
         var t = new Date().getTime(),
             se0 = <SortingExpression> {
                                         fieldName: this.sorting.key || "number",
-                                        dir: SortingDirection.desc
+                                        dir: SortingDirection.Desc
                                     },
             se1 = <SortingExpression> {
                                         fieldName: "col2",
-                                        dir: SortingDirection.desc
+                                        dir: SortingDirection.Desc
                                     };
         this.listSortingData.data = DataUtil.sort(this.data.rows, { expressions: [se0, se1]});
         this.listSortingData.keys = this.data.keys;

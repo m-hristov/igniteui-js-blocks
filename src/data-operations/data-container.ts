@@ -29,8 +29,9 @@ export class DataContainer {
      * processed data
      */
     transformedData: any[];
-
-    // settings
+    /**
+     * 
+     */
     state: DataState = {
     };
     constructor (data: any[] = [], total?: number) {
@@ -54,6 +55,7 @@ export class DataContainer {
         this.transformedData = DataUtil.process(this.data, this.state);
         return this;
     }
+    /* CRUD operations */
     // access data records
     getIndexOfRecord (record: Object, data?: any[]): number {
         data = data || this.data || [];
@@ -61,14 +63,14 @@ export class DataContainer {
     }
     getRecordByIndex (index: number, data?: any[]) {
         if (index < 0) {
-            return null;
+            return undefined;
         }
         data = data || this.data || [];
-        return data[index] || null;
+        return data[index];
     }
     getRecordInfoByKeyValue (fieldName: string, value: any, data?: any[]): {index: number, record: Object} {
         data = data || this.data || [];
-        var len = data.length, i, res = {index: -1, record: null};
+        var len = data.length, i, res = {index: -1, record: undefined};
         for (i = 0; i < len; i++) {
             if (data[i][fieldName] === value) {
                 return {
@@ -79,56 +81,44 @@ export class DataContainer {
         }
         return res;
     }
-    // basic data operations
-    /*
-    sort (sortingState: SortingState): DataContainer {
-        this.state = this.state || {};
-        this.state.sorting = sortingState;
-        this.transformedData = DataUtil.sort(this.transformedData, this.state.sorting);
-        return this;
-    }
-    filter (filteringState: FilteringState): DataContainer {
-        this.state = this.state || {};
-        this.state.filtering = filteringState;
-        this.transformedData = DataUtil.filter(this.transformedData, this.state.filtering);
-        return this;
-    }
-    page(pagingState: PagingState): DataContainer {
-        this.state = this.state || {};
-        this.state.paging = pagingState;
-        this.transformedData = DataUtil.page(this.transformedData, this.state.paging);
-        return this;
-    }
-    */
-    // CRUD operations
-    addRecord (record: Object, at?: number, data?: any[]): DataContainer {
+    addRecord (record: Object, at?: number, data?: any[]): boolean {
         data = data || this.data;
+        if (!data) {
+            return false;
+        }
         if (at === null || at === undefined) {
             data.push(record);
-            return this;
+        } else {
+            data.splice(at, 0, record);
         }
-        data.splice(at, 0, record);
-        return this;
+        return true;
     }
-    deleteRecord(record: Object, data?: any[]): DataContainer {
+    deleteRecord(record: Object, data?: any[]): boolean {
         data = data || this.data;
+        if (!data) {
+            return false;
+        }
         var index:number = data.indexOf(record);
+        if (index < -1) {
+            return false;
+        }
         return this.deleteRecordByIndex(index, data);
     }
-    deleteRecordByIndex(index: number, data?: any[]): DataContainer {
+    deleteRecordByIndex(index: number, data?: any[]): boolean {
         data = data || this.data;
         if (!data || index < 0 || index >= data.length || !data[index]) {
-            return this;
+            return false;
         }
         data.splice(index, 1);
-        return this;
+        return true;
     }
-    updateRecordByIndex(index: number, record: Object, data?: any[]): DataContainer {
+    updateRecordByIndex(index: number, record: Object, data?: any[]): boolean {
         data = data || this.data;
-        if (!data[index]) {
-            return this;
+        var foundRec = this.getRecordByIndex(index, data);
+        if (!foundRec) {
+            return false;
         }
-        data[index] = record;
-        return this;
+        Object.assign(foundRec, record);
+        return true;
     }
 }

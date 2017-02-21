@@ -17,7 +17,8 @@ export class DataUtil {
             return target;
         }
         if (!target) {
-            return Object.assign({}, defaults);
+            target = Object.assign({}, defaults);
+            return target;
         }
         Object
             .keys(defaults)
@@ -25,6 +26,14 @@ export class DataUtil {
                 if (target[key] === undefined) {target[key] = defaults[key]; }
             });
         return target;
+    }
+    static getFilteringConditionsByDataType(dataType: "string" | "number" | "boolean" | "date"): Array<string> {
+        var res = [],
+            conditions = FilteringCondition[dataType];
+        if (!conditions) {
+            return res;
+        }
+        return Object.keys(conditions);
     }
     static sort<T> (data: T[], state: SortingState): T[] {
         if (!state) {

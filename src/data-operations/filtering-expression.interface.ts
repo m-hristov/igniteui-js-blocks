@@ -3,12 +3,16 @@ export enum FilteringLogic {
     And,
     Or
 };
+export declare interface FilteringSettings {
+    ignoreCase?: boolean;
+    dateFormat?: string;
+}
 /**
  * Represents filtering expressions.
  */
 export declare interface FilteringExpression {
-   fieldName: string;
-   condition: (value: any, expression: FilteringExpression, ignoreCase: boolean, record: Object)=> boolean;
-   searchVal?: any;
-   ignoreCase?: boolean;
+    fieldName: string;
+    condition: (value: any, search?: any, settings?: Object, record?: Object)=> boolean;
+    searchVal?: any;
+    settings?: FilteringSettings
 }

@@ -25,28 +25,28 @@ describe('Unit testing DataUtil', () => {
         it('calls process as applies filtering, sorting, paging', () => {
             var metadata,
                 state:DataState = {
-                filtering: {
-                    expressions: [{
-                        fieldName: "number", 
-                        condition: FilteringCondition.number.greaterThan, 
-                        searchVal: 1}]
-                },
-                sorting: {
-                        expressions: [
-                            {
-                                fieldName: "number",
-                                dir: SortingDirection.desc
-                            }
-                        ]
+                    filtering: {
+                        expressions: [{
+                            fieldName: "number", 
+                            condition: FilteringCondition.number.greaterThan, 
+                            searchVal: 1}]
                     },
-                paging: {
-                    index: 1,
-                    recordsPerPage: 2
-                }
-            }, 
-            helper:TestHelper = new TestHelper(),
-            data:Object[] = helper.generateData(), 
-            result = DataUtil.process(data, state);
+                    sorting: {
+                            expressions: [
+                                {
+                                    fieldName: "number",
+                                    dir: SortingDirection.Desc
+                                }
+                            ]
+                        },
+                    paging: {
+                        index: 1,
+                        recordsPerPage: 2
+                    }
+                }, 
+                helper:TestHelper = new TestHelper(),
+                data:Object[] = helper.generateData(), 
+                result = DataUtil.process(data, state);
             expect(helper.getValuesForColumn(result, "number"))
                     .toEqual([2]);
             metadata = state.paging.metadata;
