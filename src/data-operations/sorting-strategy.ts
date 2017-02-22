@@ -7,11 +7,22 @@ export interface ISortingStrategy {
 
 
 export class SortingStrategy implements ISortingStrategy {
-    ignoreCase: boolean = true;
+    constructor(public ignoreCase: boolean = true){
+    }
+    private setDefaultSettings(expressions: SortingExpression[]) {
+        if (!expressions) {
+            return;
+        }
+        // apply default sorting expressions
+        expressions.forEach((expr: SortingExpression) => {
+            expr.ignoreCase = expr.ignoreCase === undefined ? this.ignoreCase: expr.ignoreCase;
+        });
+    }
     sort(data: any[], expressions: SortingExpression[]): any[] {
+        this.setDefaultSettings(expressions);
         return this.sortDataRecursive(data, expressions);
     }
-    arraySort<T> (data: T[], compareFn?): T[] {
+    protected arraySort<T> (data: T[], compareFn?): T[] {
         return data.sort(compareFn);
     }
     private groupedRecordsByExpression<T> (data: T[], index: number, expression: SortingExpression): T[] {
@@ -46,7 +57,7 @@ export class SortingStrategy implements ISortingStrategy {
         }
         return a > b ? 1 : a < b ? -1 : 0;
     }
-    compareObjects(obj1: Object, obj2: Object, key: string, reverse: number, ignoreCase: boolean) {
+    protected compareObjects(obj1: Object, obj2: Object, key: string, reverse: number, ignoreCase: boolean) {
         var a = obj1[key], b = obj2[key];
         if (ignoreCase) {
             a = a && a.toLowerCase ? a.toLowerCase() : a;
@@ -60,7 +71,7 @@ export class SortingStrategy implements ISortingStrategy {
             ignoreCase = expression.ignoreCase ? 
                             data[0] && (typeof data[0][key] === "string" || data[0][key] === null || data[0][key] === undefined): 
                             false,
-            reverse = (expression.dir === SortingDirection.desc? -1 : 1),
+            reverse = (expression.dir === SortingDirection.Desc? -1 : 1),
             cmpFunc = expression.compareFunction;
             cmpFunc = cmpFunc || function(obj1, obj2) {
                 return self.compareObjects(obj1, obj2, key, reverse, ignoreCase);

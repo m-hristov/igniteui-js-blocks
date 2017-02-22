@@ -5,22 +5,23 @@ import {
 import { Component, ViewChild } from "@angular/core";
 import { FormsModule } from '@angular/forms';
 import { By } from "@angular/platform-browser";
-import { DataUtil, FilteringStrategy, FilteringCondition, FilteringExpression, FilteringState } from "../../main";
+import { DataUtil, FilteringStrategy, FilteringCondition, FilteringLogic, FilteringExpression, FilteringState } from "../../main";
 import {TestHelper} from "./test-helper.spec";
 
 
 class CustomFilteringStrategy extends FilteringStrategy {
-    filter<T>(data: T[], state: FilteringState): T[] {
+   filter<T>(data: T[],
+                expressions: Array<FilteringExpression>, 
+                logic?: FilteringLogic): T[] {
         var i, len = Math.ceil(data.length / 2),
-            exprs = state.expressions,
             res: T[] = [], 
             rec;
-        if (!exprs || !exprs.length || !len) {
+        if (!expressions || !expressions.length || !len) {
             return data;
         }
         for (i = 0; i < len; i++) {
             rec = data[i];
-            if (this.findMatchByExpressions(rec, state)) {
+            if (this.findMatchByExpressions(rec, expressions, logic)) {
                 res.push(rec);
             }
         }
@@ -46,7 +47,7 @@ export function TestFiltering() {
                                                 {
                                                     fieldName: "string", 
                                                     condition: FilteringCondition.string.contains, 
-                                                    searchVal: "row", ignoreCase: true
+                                                    searchVal: "row"
                                                 }]
                                     });
             expect(helper.getValuesForColumn(res, "number"))
@@ -58,7 +59,10 @@ export function TestFiltering() {
                                                 {
                                                     fieldName: "string", 
                                                     condition: FilteringCondition.string.contains, 
-                                                    searchVal: "ROW"
+                                                    searchVal: "ROW",
+                                                    settings: {
+                                                        ignoreCase: false
+                                                    }
                                                 }]
                                     });
             expect(helper.getValuesForColumn(res, "number"))

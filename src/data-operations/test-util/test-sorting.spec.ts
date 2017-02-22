@@ -21,7 +21,7 @@ export function TestSorting() {
         it('sorts descending column "number"', () => {
             var se = <SortingExpression> {
                     fieldName: "number",
-                    dir: SortingDirection.desc
+                    dir: SortingDirection.Desc
                 },
                 res = DataUtil.sort(data, {expressions: [se]});
             expect(helper.getValuesForColumn(res, "number"))
@@ -30,7 +30,7 @@ export function TestSorting() {
         it('sorts ascending column "boolean"', () => {
             var se = <SortingExpression> {
                     fieldName: "boolean",
-                    dir: SortingDirection.asc
+                    dir: SortingDirection.Asc
                 },
                 res = DataUtil.sort(data, {expressions: [se]});
             expect(helper.getValuesForColumn(res, "boolean"))
@@ -40,11 +40,11 @@ export function TestSorting() {
         it('sorts descending column "boolean", sorts "date" ascending', () => {
             var se0 = <SortingExpression> {
                     fieldName: "boolean",
-                    dir: SortingDirection.desc
+                    dir: SortingDirection.Desc
                 },
                 se1 = <SortingExpression> {
                     fieldName: "date",
-                    dir: SortingDirection.asc
+                    dir: SortingDirection.Asc
                 },
                 res = DataUtil.sort(data, {expressions: [se0, se1]});
             expect(helper.getValuesForColumn(res, "number"))
@@ -55,7 +55,7 @@ export function TestSorting() {
             var key = "number",
                 se0:SortingExpression = {
                     fieldName: key,
-                    dir: SortingDirection.asc,
+                    dir: SortingDirection.Asc,
                     // sorting descending
                     compareFunction: function (obj1, obj2) {
                         var a = obj1[key], b = obj2[key];

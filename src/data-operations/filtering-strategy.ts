@@ -1,43 +1,52 @@
-import { FilteringExpression, FilteringLogic, FilteringSettings } from "./filtering-expression.interface";
+import { FilteringExpression, FilteringLogic, FilteringExpressionSettings } from "./filtering-expression.interface";
 import { FilteringCondition } from "./filtering-condition";
 import { FilteringState } from "./filtering-state.interface";
 import {DataUtil} from "./data-util";
 
 export interface IFilteringStrategy {
-    filter(data: any[], filteringState: FilteringState): any[];
+    filter(data: any[], expressions: Array<FilteringExpression>, logic?: FilteringLogic): any[];
+}
+
+const expressionSettingsDefaults:FilteringExpressionSettings = {
+    ignoreCase: true,
+    dateFormat: "dMy"
 }
 
 export class FilteringStrategy implements IFilteringStrategy {
-    settings: FilteringSettings = {
-        ignoreCase: true,
-        dateFormat: "dMy"
+    constructor(public defaultExpressionSettings: FilteringExpressionSettings = expressionSettingsDefaults) {
     }
-    filter<T>(data: T[], filteringState: FilteringState): T[] {
+    private setDefaultSettings(expressions: Array<FilteringExpression>) {
+        expressions.forEach((expr) => {
+            expr.settings = expr.settings || {}; 
+            DataUtil.mergeDefaultProperties(expr.settings, this.defaultExpressionSettings);
+        });
+    }
+    filter<T>(data: T[],
+                expressions: Array<FilteringExpression>, 
+                logic?: FilteringLogic): T[] {
         var i, len = data.length,
             res: T[] = [],
-            exprs = filteringState.expressions,
             rec;
-        if (!exprs || !exprs.length || !len) {
+        if (!expressions || !expressions.length || !len) {
             return data;
         }
-        exprs.forEach((expr) => {
-            expr.settings = expr.settings || {}; 
-            DataUtil.mergeDefaultProperties(expr.settings, this.settings);
-        });
+        this.setDefaultSettings(expressions);
         for (i = 0; i < len; i++) {
             rec = data[i];
-            if (this.findMatchByExpressions(rec, filteringState)) {
+            if (this.findMatchByExpressions(rec, expressions, logic)) {
                 res.push(rec);
             }
         }
         return res;
     }
-    findMatchByExpressions(rec: Object, filteringState: FilteringState): Boolean {
-        var i, exprs = filteringState.expressions, len = exprs.length, match = false, 
-            conjunction = (filteringState.logic === FilteringLogic.And);
+    findMatchByExpressions(rec: Object,
+                            expressions: Array<FilteringExpression>, 
+                            logic?: FilteringLogic): Boolean {
+        var i, len = expressions.length, match = false, 
+            and = (logic === FilteringLogic.And);
         for (i = 0; i < len; i++) {
-            match = this.findMatch(rec, exprs[i]);
-            if (conjunction) {
+            match = this.findMatch(rec, expressions[i]);
+            if (and) {
                 if (!match) {
                     return false;
                 }

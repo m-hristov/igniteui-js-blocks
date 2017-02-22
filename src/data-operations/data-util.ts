@@ -1,6 +1,6 @@
 import { FilteringExpression, FilteringLogic } from "./filtering-expression.interface";
 import { FilteringCondition } from "./filtering-condition";
-import { FilteringState, FilteringStateDefaults } from "./filtering-state.interface";
+import { FilteringState, filteringStateDefaults } from "./filtering-state.interface";
 import { IFilteringStrategy, FilteringStrategy } from "./filtering-strategy";
 
 import { SortingExpression, SortingDirection } from "./sorting-expression.interface";
@@ -23,7 +23,9 @@ export class DataUtil {
         Object
             .keys(defaults)
             .forEach(function(key) { 
-                if (target[key] === undefined) {target[key] = defaults[key]; }
+                if (target[key] === undefined && defaults[key] !== undefined) {
+                    target[key] = defaults[key];
+                }
             });
         return target;
     }
@@ -77,8 +79,8 @@ export class DataUtil {
             return data;
         }
         // set defaults
-        DataUtil.mergeDefaultProperties(state, FilteringStateDefaults);
-        return state.strategy.filter(data, state);
+        DataUtil.mergeDefaultProperties(state, filteringStateDefaults);
+        return state.strategy.filter(data, state.expressions, state.logic);
     }
     static process<T> (data: T[], state: DataState): T[] {
         if (!state) {

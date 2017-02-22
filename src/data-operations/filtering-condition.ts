@@ -1,4 +1,4 @@
-import {FilteringSettings} from "./filtering-expression.interface";
+import {FilteringExpressionSettings} from "./filtering-expression.interface";
 // helper functions
 function applyIgnoreCase (a: string, ignoreCase: boolean) : string {
     a = a || "";
@@ -51,37 +51,37 @@ function getDateParts(date: Date, dateFormat?: string):
 }
 export const FilteringCondition = {
     string: {
-        contains: function (target: string, search: string, fs: FilteringSettings = {}) : boolean
+        contains: function (target: string, search: string, fs: FilteringExpressionSettings = {}) : boolean
         {
             target = applyIgnoreCase(target, fs.ignoreCase);
             search = applyIgnoreCase(search, fs.ignoreCase);
             return target.indexOf(search) !== -1;
         },
-        startsWith: function (target: string, search: string, fs: FilteringSettings = {}) : boolean
+        startsWith: function (target: string, search: string, fs: FilteringExpressionSettings = {}) : boolean
         {
             target = applyIgnoreCase(target, fs.ignoreCase);
             search = applyIgnoreCase(search, fs.ignoreCase);
             return target.startsWith(search);
         },
-        endsWith: function (target: string, search: string, fs: FilteringSettings = {}) : boolean
+        endsWith: function (target: string, search: string, fs: FilteringExpressionSettings = {}) : boolean
         {
             target = applyIgnoreCase(target, fs.ignoreCase);
             search = applyIgnoreCase(search, fs.ignoreCase);
             return target.endsWith(search);
         },
-        doesNotContain: function (target: string, search: string, fs: FilteringSettings = {}) : boolean
+        doesNotContain: function (target: string, search: string, fs: FilteringExpressionSettings = {}) : boolean
         {
             target = applyIgnoreCase(target, fs.ignoreCase), 
             search = applyIgnoreCase(search, fs.ignoreCase);
             return target.indexOf(search) === -1;
         },
-        equals: function (target: string, search: string, fs: FilteringSettings = {}) : boolean
+        equals: function (target: string, search: string, fs: FilteringExpressionSettings = {}) : boolean
         {
             target = applyIgnoreCase(target, fs.ignoreCase);
             search = applyIgnoreCase(search, fs.ignoreCase);
             return target === search;
         },
-        doesNotEqual: function (target: string, search: string, fs: FilteringSettings = {}) : boolean
+        doesNotEqual: function (target: string, search: string, fs: FilteringExpressionSettings = {}) : boolean
         {
             target = applyIgnoreCase(target, fs.ignoreCase);
             search = applyIgnoreCase(search, fs.ignoreCase);
@@ -167,7 +167,7 @@ export const FilteringCondition = {
         }
     },
     date: {
-        equals: function (target: Date, search: Date, fs: FilteringSettings = {}) : boolean {
+        equals: function (target: Date, search: Date, fs: FilteringExpressionSettings = {}) : boolean {
             if (!target || !search || !fs.dateFormat) {
                 return target === search;
             }
@@ -184,7 +184,7 @@ export const FilteringCondition = {
             }
             return res;
         },
-        doesNotEqual: function (target: Date, search: Date, fs: FilteringSettings = {}) : boolean {
+        doesNotEqual: function (target: Date, search: Date, fs: FilteringExpressionSettings = {}) : boolean {
             return !FilteringCondition.date.equals(target, search, fs);
         },
         before: function (target: Date, search: Date) : boolean {

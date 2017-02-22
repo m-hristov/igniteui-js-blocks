@@ -1,7 +1,7 @@
 import {FilteringLogic, FilteringExpression} from "./filtering-expression.interface";
 import { IFilteringStrategy, FilteringStrategy} from "./filtering-strategy";
 
-export const FilteringStateDefaults = {
+export const filteringStateDefaults = {
     logic: FilteringLogic.And,
     strategy: new FilteringStrategy()
 }
