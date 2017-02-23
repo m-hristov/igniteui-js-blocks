@@ -9,7 +9,7 @@ import { TestHelper} from "./test-util/test-helper.spec";
 
 import { SortingStrategy, SortingDirection } from "../main";
 
-describe("Unit testing filtering strategy", () => {
+describe("Unit testing SortingStrategy", () => {
     var helper:TestHelper,
         data:Object[],
         strategy: SortingStrategy;
@@ -46,7 +46,7 @@ describe("Unit testing filtering strategy", () => {
             .toBeTruthy("Comare equal variables");
     });
     it("tests default settings", () => {
-        strategy = new SortingStrategy(false);
+        strategy = new SortingStrategy();
         data[4]["string"] = "ROW";
         var res = strategy.sort(data, [{
                 dir: SortingDirection.Asc,

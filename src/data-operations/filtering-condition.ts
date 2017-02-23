@@ -1,4 +1,4 @@
-import {FilteringExpressionSettings} from "./filtering-expression.interface";
+import {FilteringExpressionSettings} from "./filtering-expression-settings.interface";
 // helper functions
 function applyIgnoreCase (a: string, ignoreCase: boolean) : string {
     a = a || "";
@@ -169,7 +169,7 @@ export const FilteringCondition = {
     date: {
         equals: function (target: Date, search: Date, fs: FilteringExpressionSettings = {}) : boolean {
             if (!target || !search || !fs.dateFormat) {
-                return target === search;
+                return +target === +search;
             }
             var dpTarget = getDateParts(target, fs.dateFormat),
                 dpSearch = getDateParts(search, fs.dateFormat), 

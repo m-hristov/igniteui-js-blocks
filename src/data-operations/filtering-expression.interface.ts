@@ -1,12 +1,10 @@
 import { FilteringCondition } from "./filtering-condition";
+import {FilteringExpressionSettings} from "./filtering-expression-settings.interface";
 export enum FilteringLogic {
     And,
     Or
 };
-export declare interface FilteringExpressionSettings {
-    ignoreCase?: boolean;
-    dateFormat?: string;
-}
+
 /**
  * Represents filtering expressions.
  */

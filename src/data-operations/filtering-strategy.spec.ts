@@ -9,7 +9,7 @@ import { TestHelper} from "./test-util/test-helper.spec";
 
 import { FilteringStrategy, FilteringCondition, FilteringLogic, FilteringExpression, FilteringState } from "../main";
 
-describe("Unit testing filtering strategy", () => {
+describe("Unit testing FilteringStrategy", () => {
     var helper:TestHelper,
         data:Object[],
         fs: FilteringStrategy;
@@ -27,9 +27,9 @@ describe("Unit testing filtering strategy", () => {
         expect(helper.getValuesForColumn(res, "number"))
                     .toEqual([2, 3, 4]);
     });
-    it ("tests `findMatchByExpressions`", () => {
+    it ("tests `matchRecordByExpressions`", () => {
         var rec = data[0],
-            res = fs.findMatchByExpressions(rec, 
+            res = fs.matchRecordByExpressions(rec, 
                             [
                                 {
                                     fieldName: "string",
@@ -57,7 +57,7 @@ describe("Unit testing filtering strategy", () => {
     });
     it ("tests default settings", () => {
         data[0]["string"] = "ROW"
-        var fs = new FilteringStrategy({ignoreCase: false}),
+        var fs = new FilteringStrategy(),
             res = fs.filter(data, [{
                                     fieldName: "string",
                                     condition: FilteringCondition.string.contains,

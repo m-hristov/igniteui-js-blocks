@@ -8,7 +8,7 @@ import { By } from "@angular/platform-browser";
 
 import { TestHelper} from "./test-util/test-helper.spec";
 import {FilteringCondition} from "./filtering-condition";
-describe('Unit testing Filtering Conditions', () => {
+describe('Unit testing FilteringCondition', () => {
     it("tests string conditions", () => {
         var fc = FilteringCondition.string;
         // contains
@@ -85,7 +85,7 @@ describe('Unit testing Filtering Conditions', () => {
         expect(fn.null(null))
             .toBeTruthy("null");
     });
-    it("it tests date conditions", () => {
+    it("tests date conditions", () => {
         var fd = FilteringCondition.date,
             now = new Date(),
             cnow = new Date(),
@@ -128,5 +128,20 @@ describe('Unit testing Filtering Conditions', () => {
             .toBeTruthy("today");
         expect(!fd.yesterday(now) && fd.yesterday(yesterday))
             .toBeTruthy("yesterday");
+    });
+    it("tests boolean conditions", () => {
+        var f = FilteringCondition.boolean;
+        expect(f.empty(null) && f.empty(undefined) && !f.empty(false))
+            .toBeTruthy("empty");
+        expect(f.false(false) && !f.false(true))
+            .toBeTruthy("false");
+        expect(!f.true(false) && f.true(true))
+            .toBeTruthy("true");
+        expect(!f.notEmpty(null) && !f.notEmpty(undefined) && f.notEmpty(false))
+            .toBeTruthy("notEmpty");
+        expect(f.null(null) && !f.null(undefined) && !f.null(false))
+            .toBeTruthy("null");
+        expect(!f.notNull(null) && f.notNull(undefined) && f.notNull(false))
+            .toBeTruthy("notNull");
     });
 });

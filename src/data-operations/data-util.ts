@@ -38,11 +38,21 @@ export class DataUtil {
         return Object.keys(conditions);
     }
     static sort<T> (data: T[], state: SortingState): T[] {
-        if (!state) {
+        if (!state || !state.expressions) {
             return data;
         }
         // set defaults
+        state.defaultExpressionSettings = DataUtil.mergeDefaultProperties(state.defaultExpressionSettings, 
+                                        SortingStateDefaults.defaultExpressionSettings);
         DataUtil.mergeDefaultProperties(state, SortingStateDefaults);
+        // apply default settings for each sorting expression(if not set)
+        state.expressions.forEach((expr: SortingExpression) => {
+            expr.ignoreCase = expr.ignoreCase === undefined ? 
+                            state.defaultExpressionSettings.ignoreCase: expr.ignoreCase;
+        });
+        if (!state.strategy) {
+            return data;
+        }
         return state.strategy.sort(data, state.expressions);
     }
     static page<T> (data: T[], state: PagingState): T[] {
@@ -75,11 +85,19 @@ export class DataUtil {
     }
     static filter<T> (data: T[],
                     state: FilteringState): T[] {
-        if (!state) {
+        if (!state || !state.expressions) {
             return data;
         }
         // set defaults
+        state.defaultExpressionSettings = DataUtil.mergeDefaultProperties(state.defaultExpressionSettings, 
+                                        filteringStateDefaults.defaultExpressionSettings);
         DataUtil.mergeDefaultProperties(state, filteringStateDefaults);
+        state.expressions.forEach((expr) => {
+            expr.settings = DataUtil.mergeDefaultProperties(expr.settings, state.defaultExpressionSettings);
+        });
+        if (!state.strategy) {
+            return data;
+        }
         return state.strategy.filter(data, state.expressions, state.logic);
     }
     static process<T> (data: T[], state: DataState): T[] {

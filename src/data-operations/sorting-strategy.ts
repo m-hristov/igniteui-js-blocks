@@ -5,21 +5,8 @@ export interface ISortingStrategy {
     compareValues: (a: any, b: any) => number;
 }
 
-
 export class SortingStrategy implements ISortingStrategy {
-    constructor(public ignoreCase: boolean = true){
-    }
-    private setDefaultSettings(expressions: SortingExpression[]) {
-        if (!expressions) {
-            return;
-        }
-        // apply default sorting expressions
-        expressions.forEach((expr: SortingExpression) => {
-            expr.ignoreCase = expr.ignoreCase === undefined ? this.ignoreCase: expr.ignoreCase;
-        });
-    }
     sort(data: any[], expressions: SortingExpression[]): any[] {
-        this.setDefaultSettings(expressions);
         return this.sortDataRecursive(data, expressions);
     }
     protected arraySort<T> (data: T[], compareFn?): T[] {
