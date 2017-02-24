@@ -1,5 +1,4 @@
 import { FilteringExpression, FilteringLogic } from "./filtering-expression.interface";
-import { FilteringExpressionSettings } from "./filtering-expression-settings.interface";
 import { FilteringCondition } from "./filtering-condition";
 import { FilteringState } from "./filtering-state.interface";
 import {DataUtil} from "./data-util";
@@ -20,19 +19,20 @@ export class FilteringStrategy implements IFilteringStrategy {
         }
         for (i = 0; i < len; i++) {
             rec = data[i];
-            if (this.matchRecordByExpressions(rec, expressions, logic)) {
+            if (this.matchRecordByExpressions(rec, expressions, i, logic)) {
                 res.push(rec);
             }
         }
         return res;
     }
     matchRecordByExpressions(rec: Object,
-                            expressions: Array<FilteringExpression>, 
+                            expressions: Array<FilteringExpression>,
+                            index: number,
                             logic?: FilteringLogic): Boolean {
         var i, len = expressions.length, match = false, 
             and = (logic === FilteringLogic.And);
         for (i = 0; i < len; i++) {
-            match = this.findMatch(rec, expressions[i]);
+            match = this.findMatch(rec, expressions[i], i);
             if (and) {
                 if (!match) {
                     return false;
@@ -45,10 +45,14 @@ export class FilteringStrategy implements IFilteringStrategy {
         }
         return match;
     }
-    findMatch(rec: Object, expr: FilteringExpression): boolean {
+    findMatch(rec: Object, expr: FilteringExpression, index: number): boolean {
         var cond = expr.condition,
-            key = expr.fieldName,
-            val = rec[key];
-        return cond(val, expr.searchVal, expr.settings, rec);
+            val = rec[expr.fieldName];
+        return cond(val, {
+            ignoreCase: expr.ignoreCase,
+            search: expr.searchVal,
+            index: index,
+            record: rec
+        });
     }
 }

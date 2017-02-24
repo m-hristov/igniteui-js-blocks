@@ -29,11 +29,10 @@ export class DataUtil {
             });
         return target;
     }
-    static getFilteringConditionsByDataType(dataType: "string" | "number" | "boolean" | "date"): Array<string> {
-        var res = [],
-            conditions = FilteringCondition[dataType];
+    static getFilteringConditionsByDataType(dataType: "string" | "number" | "boolean" | "date"| string): Array<string> {
+        var conditions = FilteringCondition[dataType];
         if (!conditions) {
-            return res;
+            return undefined;
         }
         return Object.keys(conditions);
     }
@@ -42,13 +41,13 @@ export class DataUtil {
             return data;
         }
         // set defaults
-        state.defaultExpressionSettings = DataUtil.mergeDefaultProperties(state.defaultExpressionSettings, 
-                                        SortingStateDefaults.defaultExpressionSettings);
+        state.expressionDefaults = DataUtil.mergeDefaultProperties(state.expressionDefaults, 
+                                        SortingStateDefaults.expressionDefaults);
         DataUtil.mergeDefaultProperties(state, SortingStateDefaults);
         // apply default settings for each sorting expression(if not set)
         state.expressions.forEach((expr: SortingExpression) => {
             expr.ignoreCase = expr.ignoreCase === undefined ? 
-                            state.defaultExpressionSettings.ignoreCase: expr.ignoreCase;
+                            (state.expressionDefaults || {}).ignoreCase: expr.ignoreCase;
         });
         if (!state.strategy) {
             return data;
@@ -89,11 +88,13 @@ export class DataUtil {
             return data;
         }
         // set defaults
-        state.defaultExpressionSettings = DataUtil.mergeDefaultProperties(state.defaultExpressionSettings, 
-                                        filteringStateDefaults.defaultExpressionSettings);
+        state.expressionDefaults = DataUtil.mergeDefaultProperties(state.expressionDefaults, 
+                                        SortingStateDefaults.expressionDefaults);
+        // set defaults
         DataUtil.mergeDefaultProperties(state, filteringStateDefaults);
         state.expressions.forEach((expr) => {
-            expr.settings = DataUtil.mergeDefaultProperties(expr.settings, state.defaultExpressionSettings);
+            expr.ignoreCase = expr.ignoreCase === undefined ?
+                            (state.expressionDefaults || {}).ignoreCase: expr.ignoreCase;
         });
         if (!state.strategy) {
             return data;

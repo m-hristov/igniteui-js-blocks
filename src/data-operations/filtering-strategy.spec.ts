@@ -35,9 +35,7 @@ describe("Unit testing FilteringStrategy", () => {
                                     fieldName: "string",
                                     condition: FilteringCondition.string.contains,
                                     searchVal: "ROW",
-                                    settings: {
-                                        ignoreCase: false
-                                    }
+                                    ignoreCase: false
                                 },
                                 {
                                     fieldName: "number",
@@ -52,7 +50,7 @@ describe("Unit testing FilteringStrategy", () => {
         var rec = data[0],
             res = fs.findMatch(rec, {
                     fieldName: "boolean",
-                    condition: FilteringCondition.boolean.false});
+                    condition: FilteringCondition.boolean.false}, -1);
             expect(res).toBeTruthy();
     });
     it ("tests default settings", () => {

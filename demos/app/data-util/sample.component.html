@@ -1,3 +1,18 @@
+<style>
+.panel {
+    margin: 0 15px;
+    padding: 5px;
+    float: left;
+    border: solid 1px gray;
+    border-radius: 12px;
+}
+.paging {
+    width: 30%;    
+}
+.panels {
+    clear:both;
+}
+</style>
 <h3>Data utils:</h3>
     <h4>Remote DataSource</h4>
     <button igxButton="raised" (click)="this.ds2.process()">DataBind</button>
@@ -10,49 +25,66 @@
     </table>-->
     <data-iterator #listRemoteData [dataContainer]="remoteData|async"></data-iterator>
 
-    <h4>Consume data from a service</h4>
-    <button igxButton="raised" (click)="this.ds2.process()">DataBind</button>
-    <data-iterator #list></data-iterator>
+    <div class="panels">
+        <h4>Paging + Filtering + Sorting:</h4>
 
-    <h4>Paging:</h4>
-    <div class="igx-form-group">
-        <input width="100" igxInput type="number" [(ngModel)]="paging.pageIndex"/> <label igxLabel>Page index: </label> 
-        <button igxButton="raised" (click)="rebind()">Rebind</button>
-        <button igxButton="raised" (click)="reset()">Reset DataSource settings</button>
-    </div>
-    <div class="igx-form-group">
-        <input igxInput type="number" [(ngModel)]="paging.pageSize"/><label igxLabel>Page size:</label>
-        <button igxButton="raised" igxButtonColor="white" igxButtonBackground="#4CAF50" igxRipple="white" (click)="renderPageData()">Generate paging data</button>
-        <button igxButton="raised" igxButtonColor="white" igxButtonBackground="#4CAF50" igxRipple="white" (click)="test()">Test</button>
-    </div>
-    <span [innerHTML]="paging.pageInfo"></span>
+        <div *ngIf="dataContainer.state && dataContainer.state.paging"
+            class="paging panel">
+            <h5>Paging</h5>
+            <div class="igx-form-group">
+                <input width="100" igxInput type="number" [(ngModel)]="dataContainer.state.paging.index"/> <label igxLabel>Page index: </label> 
+            </div>
+            <div class="igx-form-group">
+                <input igxInput type="number" [(ngModel)]="dataContainer.state.paging.recordsPerPage"/><label igxLabel>Page size:</label>
+            </div>
+            <button igxButton="raised" (click)="processData()">Process Data</button>
+        </div>
+        
+        <div class="paging panel">
+            <h5>Sorting panel</h5>
+            <table>
+                <tr *ngFor="let column of (helper.columns || [])">
+                    <td>
+                        {{column.name}}:
+                    </td>
+                    <td>
+                        <button igxButton="raised" (click)="changeSortDirection(column.name)">Change Sorting</button>
+                    </td>
+                    <td>
+                        {{getSortingDirecitonText(column.name)}}
+                    </td>
+                </tr>
+            </table>
+        </div>
 
-    <data-iterator #listPagingData></data-iterator>
+        <div class="filtering panel">
+            <h5>Filtering</h5>
+            <table #filteringPanel>
+                <tr *ngFor="let column of (helper.columns || [])" 
+                    [attr.data-field-name]="column.name">
+                    <td>
+                        {{column.name}}:
+                    </td>
+                    <td>
+                        <select [attr.data-filtering-type]="column.type">
+                            <option *ngFor="let opt of (getFilteringConditions(column.type) || [])"
+                                [attr.selected]="isFilteringConditionSelected(column.name, opt)? true : null "
+                                value="{{opt}}">
+                                {{opt}}
+                            </option>
+                        </select>
+                    </td>
+                    <td>
+                        <input data-filtering-search width="100" *ngIf="column.type !== 'boolean'" igxInput type="{{column.type}}"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div style="clear:both;"></div>
+    <span [innerHTML]="dataInfo.message"></span>
+
+    <data-iterator #listData></data-iterator>
     
     <hr />
-
-    <h4>Filtering</h4>
-    <div class="igx-form-group">
-        <input width="100" igxInput type="text" [(ngModel)]="filtering.searchVal"/> <label igxLabel>Filter: </label> 
-    </div>
-    <button igxButton="raised" igxButtonColor="white"igxButtonBackground="#4CAF50" igxRipple="white" (click)="renderFilterData()">Filter</button>
-    <span [innerHTML]="filtering.info"></span>
-
-    <data-iterator #listFilteringData></data-iterator>
-
-    <hr />
-
-    <h4>Sorting:</h4>
-    <div class="igx-form-group">
-        <input width="100" igxInput type="text" [(ngModel)]="sorting.key"/> <label igxLabel>Column Key: </label> 
-    </div>
-    <button igxButton="raised" igxButtonColor="white"igxButtonBackground="#4CAF50" igxRipple="white" (click)="this.data.rows[10].col1 = 100;renderSortedData()">Sort</button>
-    <span [innerHTML]="sorting.info"></span>
-
-    <data-iterator #listSortingData></data-iterator>
-    
-    <h4>Updating</h4>
-    <button igxButton="raised" igxButtonColor="white" igxButtonBackground="#4CAF50" igxRipple="white" (click)="addRecord()">Add record</button>
-    <button igxButton="raised" igxButtonColor="white" igxButtonBackground="#4CAF50" igxRipple="white" (click)="deleteRecord()">Delete last record</button>
-    <data-iterator #listUpdating></data-iterator>
 <hr>

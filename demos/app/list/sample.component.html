@@ -1,5 +1,6 @@
 <div class="wrapper">
     <h4>Data Source Filtered List</h4>
+    <button #changeDataSource (click)="buttonChangeDSClicked()">Change DataSource</button>
     <div class="igx-form-group">
         <input class="igx-form-group__input--search" placeholder="Search List" [(ngModel)]="search1" />
         <label igxLabel>
@@ -11,10 +12,16 @@
     </div>
     <igx-list>
         <igx-list-item igxRipple="pink" igxRippleTarget=".ig-list__item" *ngFor="let item of navItems | igxFilter: fo1">
-            {{item.text}}
+            {{item.text}} <button (click)="removeElement(item)">Remove</button>
         </igx-list-item>
     </igx-list>
 </div>
+
+<div>
+    test: <rio-counter #counter></rio-counter>
+    <button (click)="testCounter()">Test counter</button>
+</div>
+
 <div class="wrapper">
     <h4>Declarative Fitered List</h4>
     <igx-checkbox [checked]="true" #checkbox>Perform filtering</igx-checkbox>

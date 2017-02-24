@@ -3,7 +3,7 @@ import {ISortingStrategy, SortingStrategy} from "./sorting-strategy";
 
 export const SortingStateDefaults = {
     strategy: new SortingStrategy(),
-    defaultExpressionSettings: { 
+    expressionDefaults: { 
         ignoreCase: true
     }
 }
@@ -11,5 +11,7 @@ export const SortingStateDefaults = {
 export interface SortingState {
     expressions: SortingExpression[];
     strategy?: ISortingStrategy;
-    defaultExpressionSettings?: { ignoreCase?: boolean };
+    expressionDefaults?: {
+        ignoreCase?: boolean 
+    };
 }

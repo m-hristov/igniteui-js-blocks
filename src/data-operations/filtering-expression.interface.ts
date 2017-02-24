@@ -1,5 +1,4 @@
-import { FilteringCondition } from "./filtering-condition";
-import {FilteringExpressionSettings} from "./filtering-expression-settings.interface";
+import { FilteringCondition, FilteringConditionArgs } from "./filtering-condition";
 export enum FilteringLogic {
     And,
     Or
@@ -10,7 +9,8 @@ export enum FilteringLogic {
  */
 export declare interface FilteringExpression {
     fieldName: string;
-    condition: (value: any, search?: any, settings?: Object, record?: Object)=> boolean;
+    //condition: (value: any, search?: any, settings?: Object, record?: Object)=> boolean;
+    condition: (value: any, args: FilteringConditionArgs) => boolean;
     searchVal?: any;
-    settings?: FilteringExpressionSettings
+    ignoreCase?: boolean
 }

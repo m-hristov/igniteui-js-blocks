@@ -70,21 +70,21 @@ function TestSorting() {
                 .toEqual(helper.generateArray(4, 0));
         });
         it ("sorts as applying default setting ignoreCase to false", () => {
-            data[4]["string"] = "ROW";
+            data[4]["string"] = data[4]["string"].toUpperCase();
             var se0:SortingExpression = {
                     fieldName: "string",
                     dir: SortingDirection.Desc
                 },
                 res = DataUtil.sort(data, {
                     expressions: [se0], 
-                    defaultExpressionSettings: {ignoreCase: false}
+                    expressionDefaults: {ignoreCase: false}
                 });
             expect(helper.getValuesForColumn(res, "number"))
-                .toEqual([3, 2, 1, 0, 4], "defaultExpressionSettings.ignoreCase = false");
+                .toEqual([3, 2, 1, 0, 4], "expressionDefaults.ignoreCase = false");
             se0.ignoreCase = true;
             res = DataUtil.sort(data, {
                     expressions: [se0],
-                    defaultExpressionSettings: {ignoreCase: false}
+                    expressionDefaults: {ignoreCase: false}
                 });
             expect(helper.getValuesForColumn(res, "number"))
                 .toEqual(helper.generateArray(4, 0));
@@ -144,9 +144,7 @@ function TestFiltering() {
                                                     fieldName: "string", 
                                                     condition: FilteringCondition.string.contains, 
                                                     searchVal: "ROW",
-                                                    settings: {
-                                                        ignoreCase: false
-                                                    }
+                                                    ignoreCase: false
                                                 }]
                                     });
             expect(helper.getValuesForColumn(res, "number"))

@@ -3,6 +3,7 @@ const COUNT_ROWS = 5;
 const COUNT_COLS = 4;
 
 export class TestHelper {
+    columns: Array<{ name: string; type: string;}> = [];
     generateArray(startValue, endValue) {
         var len = Math.abs(startValue - endValue),
             decrement = len > 0;
@@ -11,7 +12,7 @@ export class TestHelper {
     getValuesForColumn(data, fieldName) {
         return data.map((x) => x[fieldName]);
     }
-    generateColumns(countCols) {
+    generateColumns(countCols) : Array<{name: string, type: string}> {
         var i:number,
             len: number,
             res,
@@ -47,9 +48,11 @@ export class TestHelper {
                 type: "string"
             })
         }
+        return res;
     }
     generateData(countRows: number = COUNT_ROWS, countCols: number = COUNT_COLS) {
         var i, j, data = [], rec, val, col, cols = this.generateColumns(countCols);
+        this.columns = cols;
         for (i = 0; i < countRows; i++) {
             rec = {};
             for (j = 0; j < cols.length; j++) {
