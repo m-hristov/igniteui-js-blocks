@@ -56,26 +56,24 @@ describe('Unit testing FilteringCondition', () => {
     });
     it("tests number conditions", () => {
         var fn = FilteringCondition.number;
-        expect(fn.doesNotEqual(1, 2))
+        expect(fn.doesNotEqual(1, {search: 2}) && !fn.doesNotEqual(1, {search: 1}))
             .toBeTruthy("doesNotEqual");
         expect(fn.empty(null))
             .toBeTruthy("empty");
-        expect(fn.equals(1, 1))
+        expect(!fn.equals(1, {search: 2}) && fn.equals(1, {search: 1}))
             .toBeTruthy("equals");
-        expect(fn.greaterThan(2, 1))
+        expect(!fn.greaterThan(1, {search: 2}) && fn.greaterThan(2, {search: 1}))
             .toBeTruthy("greaterThan");
-        expect(fn.greaterThanOrEqualTo(2, 1))
-            .toBeTruthy("greaterThanOrEqualTo(2, 1)");
-        expect(fn.greaterThanOrEqualTo(2, 2))
-            .toBeTruthy("greaterThanOrEqualTo(2, 2)");
-        expect(fn.lessThan(1, 2))
-            .toBeTruthy("lessThan(1, 2)");
-        expect(fn.lessThan(2, 2))
-            .toBeFalsy("lessThan(2, 2)");
-        expect(fn.lessThanOrEqualTo(1, 2))
-            .toBeTruthy("lessThanOrEqualTo(1, 2)");
-        expect(fn.lessThanOrEqualTo(2, 2))
-            .toBeTruthy("lessThanOrEqualTo(2, 2)");
+        expect(!fn.greaterThanOrEqualTo(1, {search: 2}) && !fn.greaterThanOrEqualTo(1, {search: 2}) &&
+                fn.greaterThanOrEqualTo(1, {search: 1}))
+            .toBeTruthy("greaterThanOrEqualTo");
+        expect(fn.lessThan(1, {search: 2}) && !fn.lessThan(2, {search: 2}) && 
+                !fn.lessThan(3, {search: 2}))
+            .toBeTruthy("lessThan");
+        expect(fn.lessThanOrEqualTo(1, {search: 2}) && 
+                fn.lessThanOrEqualTo(1, {search: 1}) &&
+                !fn.lessThanOrEqualTo(3, {search: 2}))
+            .toBeTruthy("lessThanOrEqualTo");
         expect(fn.notEmpty(1))
             .toBeTruthy("notEmpty");
         expect(fn.empty(null))
@@ -94,9 +92,9 @@ describe('Unit testing FilteringCondition', () => {
             nextMonth = ( d => new Date(d.setMonth(d.getMonth() + 1)) )(new Date),
             lastYear = ( d => new Date(d.setFullYear(d.getFullYear() - 1)) )(new Date),
             nextYear = ( d => new Date(d.setFullYear(d.getFullYear() + 1)) )(new Date);
-        expect(fd.after(now, yesterday) && !fd.after(now, nextYear))
+        expect(fd.after(now, {search:yesterday}) && !fd.after(now, {search:nextYear}))
             .toBeTruthy("after");
-        expect(fd.before(yesterday, now) && !fd.before(now, lastYear))
+        expect(fd.before(yesterday, {search:now}) && !fd.before(now, {search:lastYear}))
             .toBeTruthy("before");
         expect(fd.doesNotEqual(now, {search: yesterday}) && fd.doesNotEqual(now, {search: yesterday}))
             .toBeTruthy("doesNotEqual");

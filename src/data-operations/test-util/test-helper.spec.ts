@@ -6,11 +6,14 @@ export class TestHelper {
     columns: Array<{ name: string; type: string;}> = [];
     generateArray(startValue, endValue) {
         var len = Math.abs(startValue - endValue),
-            decrement = len > 0;
+            decrement = startValue > endValue;
         return Array.from({length: len + 1}, (e,i)=> decrement? startValue - i: startValue + i);
     }
     getValuesForColumn(data, fieldName) {
         return data.map((x) => x[fieldName]);
+    }
+    isSuperset(haystack, arr) {
+        return arr.every(val => haystack.indexOf(val) >= 0);
     }
     generateColumns(countCols) : Array<{name: string, type: string}> {
         var i:number,

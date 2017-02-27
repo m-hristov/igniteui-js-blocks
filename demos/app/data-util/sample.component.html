@@ -1,32 +1,33 @@
 <style>
 .panel {
-    margin: 0 15px;
+    margin: 5px;
     padding: 5px;
     float: left;
     border: solid 1px gray;
     border-radius: 12px;
+    min-width: 250px;
 }
 .paging {
-    width: 30%;    
+    width: 30%;
 }
 .panels {
     clear:both;
+}
+.tbl-settings {
+    border-spacing: 1px;
+    border-collapse: collapse;
+}
+.tbl-settings td {
+    padding: 5px;
 }
 </style>
 <h3>Data utils:</h3>
     <h4>Remote DataSource</h4>
     <button igxButton="raised" (click)="this.ds2.process()">DataBind</button>
-    <!--<table>
-        <tr *ngFor="let dataRow of ((remoteData|async) || {}).transformedData">
-            <td *ngFor="let key of listRemoteData.keys">
-                {{dataRow[key]}}
-            </td>
-        </tr>
-    </table>-->
     <data-iterator #listRemoteData [dataContainer]="remoteData|async"></data-iterator>
 
     <div class="panels">
-        <h4>Paging + Filtering + Sorting:</h4>
+        <h4>Local Datasource + Paging, Filtering, Sorting:</h4>
 
         <div *ngIf="dataContainer.state && dataContainer.state.paging"
             class="paging panel">
@@ -42,7 +43,7 @@
         
         <div class="paging panel">
             <h5>Sorting panel</h5>
-            <table>
+            <table class="tbl-settings">
                 <tr *ngFor="let column of (helper.columns || [])">
                     <td>
                         {{column.name}}:
@@ -59,7 +60,7 @@
 
         <div class="filtering panel">
             <h5>Filtering</h5>
-            <table #filteringPanel>
+            <table #filteringPanel class="tbl-settings">
                 <tr *ngFor="let column of (helper.columns || [])" 
                     [attr.data-field-name]="column.name">
                     <td>
